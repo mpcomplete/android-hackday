@@ -26,7 +26,7 @@ import android.view.MotionEvent;
  */
 public class MyGLSurfaceView extends GLSurfaceView {
 
-    private final MyGLRenderer mRenderer;
+    private final ShaderToyRenderer mRenderer;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -34,7 +34,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         String vSrc = GLUtils.loadText(context, R.raw.vertex);
         String fSrc = GLUtils.loadText(context, R.raw.frag);
-        mRenderer   = new MyGLRenderer(vSrc, fSrc);
+        mRenderer   = new ShaderToyRenderer(vSrc, fSrc);
 
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);

@@ -28,11 +28,11 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     static final int COORDS_PER_VERTEX = 3;
     static final int VERTEX_STRIDE     = COORDS_PER_VERTEX * 4;
-
 
     private int program;
     private FloatBuffer vertexBuffer;
@@ -68,23 +68,12 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
 
-        final float color[] = {0.2f, 0.709803922f, 0.898039216f, 1.0f};
-        int colorHandle = GLES20.glGetUniformLocation(program, "vColor");
-        GLES20.glUniform4fv(colorHandle, 1, color, 0);
         drawVertexBuffer(vertexBuffer, drawOrderBuffer, drawOrderLength);
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-    }
-
-    public static int loadShader(int type, String shaderCode) {
-        int shader = GLES20.glCreateShader(type);
-
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-        return shader;
     }
 
     public static FloatBuffer createBuffer(float[] array) {
@@ -106,10 +95,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void drawVertexBuffer(FloatBuffer vertexBuffer,
-                                        ShortBuffer drawOrderBuffer,
-                                        int drawOrderLength) {
-        int positionHandle  = GLES20.glGetAttribLocation(program, "vPosition");
+                                 ShortBuffer drawOrderBuffer,
+                                 int drawOrderLength) {
+        final float color[] = {0.2f, 0.709803922f, 0.898039216f, 1.0f};
+        int colorHandle = GLES20.glGetUniformLocation(program, "vColor");
+        GLES20.glUniform4fv(colorHandle, 1, color, 0);
 
+        int positionHandle  = GLES20.glGetAttribLocation(program, "a_position");
         GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glVertexAttribPointer(
             positionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);

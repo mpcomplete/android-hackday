@@ -14,9 +14,12 @@ public class GLUtils {
         int shader = GLES20.glCreateShader(type);
 
         GLES20.glShaderSource(shader, src);
-        checkGlError("Shader Source");
         GLES20.glCompileShader(shader);
-        checkGlError("Shader Compile");
+
+        int[] result = new int[1];
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, result, 0);
+        if (result[0] != GLES20.GL_TRUE)
+            Log.e("BLOOP", "Shader compile error: " + GLES20.glGetShaderInfoLog(shader));
         return shader;
     }
 
@@ -26,6 +29,7 @@ public class GLUtils {
         GLES20.glAttachShader(program, vertexShader);
         GLES20.glAttachShader(program, fragmentShader);
         GLES20.glLinkProgram(program);
+        checkGlError("Program Link");
         return program;
     }
 
@@ -46,6 +50,7 @@ public class GLUtils {
         try {
             while ((thisLine = br.readLine()) != null) {
                 text += thisLine;
+                text += '\n';
             }
             is.close();
             br.close();

@@ -101,7 +101,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         int colorHandle = GLES20.glGetUniformLocation(program, "vColor");
         GLES20.glUniform4fv(colorHandle, 1, color, 0);
 
-        int positionHandle  = GLES20.glGetAttribLocation(program, "a_position");
+        int positionHandle  = GLES20.glGetAttribLocation(program, "vPosition");
         GLES20.glEnableVertexAttribArray(positionHandle);
         GLES20.glVertexAttribPointer(
             positionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);

@@ -12,21 +12,22 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Date;
 
-
-// Shadertoy specific inputs
-//
-// vec3	        iResolution	image	The viewport resolution (z is pixel aspect ratio, usually 1.0)
-// float	    iGlobalTime	image/sound	Current time in seconds
-// float	    iChannelTime[4]	image	Time for channel (if video or sound), in seconds
-// vec3	        iChannelResolution0..3	image/sound	Input texture resolution for each channel
-// vec4	        iMouse	image	xy = current pixel coords (if LMB is down). zw = click pixel
-// sampler2D	iChannel{i}	image/sound	Sampler for input textures i
-// vec4	iDate	image/sound	Year, month, day, time in seconds in .xyzw
-// float	    iSampleRate	image/sound	The sound sample rate (typically 44100)
 public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     static final int COORDS_PER_VERTEX = 3;
-    static final int VERTEX_STRIDE     = COORDS_PER_VERTEX * 4;
+    static final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4;
+
+    static final String fragmentSrcHeader =
+            "precision mediump float;" +
+            "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
+            "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
+            "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
+            "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
+            "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
+            //"uniform samplerXX iChannel0..3;" +          // input channel. XX = 2D/Cube
+            "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
+            "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
 
     private int program;
     private FloatBuffer vertexBuffer;
@@ -35,9 +36,26 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private String vertexShaderSrc;
     private String fragmentShaderSrc;
 
+    private float mPreviousX;
+    private float mPreviousY;
+
+    // Vertex shader inputs.
+    private int vPosition;  // vec3 the vertex position
+
+    // ShaderToy fragment shader inputs:
+    private int iResolution;
+    private int iGlobalTime;
+    private int iChannelTime;
+    private int iChannelResolution;
+    private int iMouse;
+    private int iChannel;
+    private int iDate;
+    private int iSampleRate;
+
+
     public ShaderToyRenderer(String vSrc, String fSrc) {
         vertexShaderSrc = vSrc;
-        fragmentShaderSrc = fSrc;
+        fragmentShaderSrc = fragmentSrcHeader + fSrc;
     }
 
     @Override
@@ -45,11 +63,21 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         program = GLUtils.programFromSrc(vertexShaderSrc, fragmentShaderSrc);
 
+        vPosition = GLES20.glGetAttribLocation(program, "vPosition");
+        iResolution = GLES20.glGetUniformLocation(program, "iResolution");
+        iGlobalTime = GLES20.glGetUniformLocation(program, "iGlobalTime");
+        iChannelTime = GLES20.glGetUniformLocation(program, "iChannelTime");
+        iChannelResolution = GLES20.glGetUniformLocation(program, "iChannelResolution");
+        iMouse = GLES20.glGetUniformLocation(program, "iMouse");
+        iChannel = GLES20.glGetUniformLocation(program, "iChannel");
+        iDate = GLES20.glGetUniformLocation(program, "iDate");
+        iSampleRate = GLES20.glGetUniformLocation(program, "iSampleRate");
+
         final float squareCoords[] = {
-            -1.0f,  -1.0f, 0.0f,
-            -1.0f,   1.0f, 0.0f,
-             1.0f,   1.0f, 0.0f,
-             1.0f,  -1.0f, 0.0f,
+            -1.0f, -1.0f, 0.0f,
+            -1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
         };
         final short drawOrder[] = {0, 1, 2, 0, 2, 3};
         vertexBuffer = createBuffer(squareCoords);
@@ -62,12 +90,39 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
 
+        Date date = new Date();
+        float time = (float)date.getTime() / 1000.0f;
+        GLES20.glUniform1f(iGlobalTime, (float)date.getTime() / 1000.0f);
+        GLES20.glUniform4f(iChannelTime, time, time, time, time);  // ???
+        float tmp1[] = {0.0f, 0.0f, 0.0f};
+        GLES20.glUniform3fv(iChannelResolution, 1, tmp1, 0);  // ???
+        // TODO: iChannel
+        float tmp2[] = {mPreviousX, mPreviousY, mPreviousX, mPreviousY};
+        GLES20.glUniform4fv(iMouse, 1, tmp2, 0);
+        float tmp3[] = {date.getYear(), date.getMonth(), date.getDate(),
+                date.getHours()*24*60 + date.getMinutes()*60 + date.getSeconds()};
+        GLES20.glUniform4fv(iDate, 1, tmp3, 0);  // ???
+        GLES20.glUniform1f(iSampleRate, 44000.0f);
+
         drawVertexBuffer(vertexBuffer, drawOrderBuffer, drawOrderLength);
     }
 
     @Override
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
+
+        float[] tmp = {width, height, (float)width / (float)height};
+        GLUtils.checkGlError("whatttt");
+        iResolution = GLES20.glGetUniformLocation(program, "iResolution");
+//        GLES20.glUniform3i(iResolution, width, height, width / height);
+//        GLES20.glUniform3fv(iResolution, 1, tmp, 0);
+        GLES20.glUniform3f(iResolution, tmp[0], tmp[1], tmp[2]);
+        GLUtils.checkGlError("why");
+    }
+
+    public void onTouchEvent(float x, float y) {
+        mPreviousX = x;
+        mPreviousY = y;
     }
 
     public static FloatBuffer createBuffer(float[] array) {
@@ -91,17 +146,12 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     public void drawVertexBuffer(FloatBuffer vertexBuffer,
                                  ShortBuffer drawOrderBuffer,
                                  int drawOrderLength) {
-        final float color[] = {0.2f, 0.709803922f, 0.898039216f, 1.0f};
-        int colorHandle = GLES20.glGetUniformLocation(program, "vColor");
-        GLES20.glUniform4fv(colorHandle, 1, color, 0);
-
-        int positionHandle  = GLES20.glGetAttribLocation(program, "a_position");
-        GLES20.glEnableVertexAttribArray(positionHandle);
+        GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glVertexAttribPointer(
-            positionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);
+            vPosition, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);
         GLES20.glDrawElements(
             GLES20.GL_TRIANGLES, drawOrderLength,
             GLES20.GL_UNSIGNED_SHORT, drawOrderBuffer);
-        GLES20.glDisableVertexAttribArray(positionHandle);
+        GLES20.glDisableVertexAttribArray(vPosition);
     }
 }

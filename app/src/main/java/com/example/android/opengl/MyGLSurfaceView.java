@@ -30,12 +30,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     public MyGLSurfaceView(Context context) {
         super(context);
+        setEGLContextClientVersion(2);
 
         String vSrc = GLUtils.loadText(context, R.raw.vertex);
         String fSrc = GLUtils.loadText(context, R.raw.frag);
         mRenderer   = new MyGLRenderer(vSrc, fSrc);
 
-        setEGLContextClientVersion(2);
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }

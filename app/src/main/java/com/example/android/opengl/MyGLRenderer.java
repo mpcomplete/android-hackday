@@ -38,15 +38,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawOrderBuffer;
     private int drawOrderLength;
+    private String vertexShaderSrc;
+    private String fragmentShaderSrc;
 
-    public MyGLRenderer (String vSrc, String fSrc) {
-        super();
-        program = GLUtils.programFromSrc(vSrc, fSrc);
+    public MyGLRenderer(String vSrc, String fSrc) {
+        vertexShaderSrc = vSrc;
+        fragmentShaderSrc = fSrc;
     }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        program = GLUtils.programFromSrc(vertexShaderSrc, fragmentShaderSrc);
 
         final float squareCoords[] = {
             -1.0f,  -1.0f, 0.0f,

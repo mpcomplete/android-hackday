@@ -23,8 +23,8 @@ public class GLUtils {
     public static int createProgram (int vertexShader, int fragmentShader) {
         int program = GLES20.glCreateProgram();
 
-        GLES20.glAttachShader(GLES20.GL_VERTEX_SHADER, vertexShader);
-        GLES20.glAttachShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader);
+        GLES20.glAttachShader(program, vertexShader);
+        GLES20.glAttachShader(program, fragmentShader);
         GLES20.glLinkProgram(program);
         return program;
     }

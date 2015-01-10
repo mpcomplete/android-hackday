@@ -18,10 +18,14 @@ package com.example.android.opengl;
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Spinner;
 
-public class OpenGLES20Activity extends Activity {
+public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSelectedListener {
 
     private GLSurfaceView mGLView;
 
@@ -35,7 +39,23 @@ public class OpenGLES20Activity extends Activity {
     public boolean onCreateOptionsMenu (Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_menu, menu);
+
+        Spinner spinner = (Spinner) findViewById(R.id.menuSort);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onItemSelected(AdapterView<?> parent,
+                               View view,
+                               int pos,
+                               long id) {
+
+        Object selected = parent.getItemAtPosition(pos);
+        String name     = selected.toString();
+        Log.d("Selection", name);
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
     }
 
     @Override

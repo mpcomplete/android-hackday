@@ -26,7 +26,7 @@ import android.view.MotionEvent;
  */
 public class MyGLSurfaceView extends GLSurfaceView {
 
-    private final MyGLRenderer mRenderer;
+    private final ShaderToyRenderer mRenderer;
 
     public MyGLSurfaceView(Context context) {
         super(context);
@@ -34,18 +34,15 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         String vSrc = GLUtils.loadText(context, R.raw.vertex);
         String fSrc = GLUtils.loadText(context, R.raw.frag);
-        mRenderer   = new MyGLRenderer(vSrc, fSrc);
+        mRenderer   = new ShaderToyRenderer(vSrc, fSrc);
 
         setRenderer(mRenderer);
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
-
-    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
-    private float mPreviousX;
-    private float mPreviousY;
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+        mRenderer.onTouchEvent(e.getX(), e.getY());
         return true;
     }
 

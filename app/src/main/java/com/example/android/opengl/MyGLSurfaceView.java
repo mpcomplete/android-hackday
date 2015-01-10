@@ -43,6 +43,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         mRenderer.onTouchEvent(e.getX(), e.getY());
+        requestRender();
         return true;
     }
 

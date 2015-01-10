@@ -36,8 +36,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private String vertexShaderSrc;
     private String fragmentShaderSrc;
 
-    private float mPreviousX;
-    private float mPreviousY;
+    private long startTime;  // time since epoch that we started.
+    private int screenWidth, screenHeight;
+    private float touchX, touchY;  // last screen pos that was touched
 
     // Vertex shader inputs.
     private int vPosition;  // vec3 the vertex position
@@ -52,8 +53,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-
     public ShaderToyRenderer(String vSrc, String fSrc) {
+        startTime = new Date().getTime();
         vertexShaderSrc = vSrc;
         fragmentShaderSrc = fragmentSrcHeader + fSrc;
     }
@@ -74,10 +75,10 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         iSampleRate = GLES20.glGetUniformLocation(program, "iSampleRate");
 
         final float squareCoords[] = {
-            -1.0f, -1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
+                -1.0f, -1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
         };
         final short drawOrder[] = {0, 1, 2, 0, 2, 3};
         vertexBuffer = createBuffer(squareCoords);
@@ -90,20 +91,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
 
-        Date date = new Date();
-        float time = (float)date.getTime() / 1000.0f;
-        GLES20.glUniform1f(iGlobalTime, (float)date.getTime() / 1000.0f);
-        GLES20.glUniform4f(iChannelTime, time, time, time, time);  // ???
-        float tmp1[] = {0.0f, 0.0f, 0.0f};
-        GLES20.glUniform3fv(iChannelResolution, 1, tmp1, 0);  // ???
-        // TODO: iChannel
-        float tmp2[] = {mPreviousX, mPreviousY, mPreviousX, mPreviousY};
-        GLES20.glUniform4fv(iMouse, 1, tmp2, 0);
-        float tmp3[] = {date.getYear(), date.getMonth(), date.getDate(),
-                date.getHours()*24*60 + date.getMinutes()*60 + date.getSeconds()};
-        GLES20.glUniform4fv(iDate, 1, tmp3, 0);  // ???
-        GLES20.glUniform1f(iSampleRate, 44000.0f);
-
+        setShaderVariables();
         drawVertexBuffer(vertexBuffer, drawOrderBuffer, drawOrderLength);
     }
 
@@ -111,18 +99,13 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
 
-        float[] tmp = {width, height, (float)width / (float)height};
-        GLUtils.checkGlError("whatttt");
-        iResolution = GLES20.glGetUniformLocation(program, "iResolution");
-//        GLES20.glUniform3i(iResolution, width, height, width / height);
-//        GLES20.glUniform3fv(iResolution, 1, tmp, 0);
-        GLES20.glUniform3f(iResolution, tmp[0], tmp[1], tmp[2]);
-        GLUtils.checkGlError("why");
+        screenWidth = width;
+        screenHeight = height;
     }
 
     public void onTouchEvent(float x, float y) {
-        mPreviousX = x;
-        mPreviousY = y;
+        touchX = x;
+        touchY = y;
     }
 
     public static FloatBuffer createBuffer(float[] array) {
@@ -153,5 +136,21 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             GLES20.GL_TRIANGLES, drawOrderLength,
             GLES20.GL_UNSIGNED_SHORT, drawOrderBuffer);
         GLES20.glDisableVertexAttribArray(vPosition);
+    }
+
+    private void setShaderVariables() {
+        GLES20.glUniform3f(iResolution, screenWidth, screenHeight,
+                (float)screenWidth / (float)screenHeight);
+
+        Date date = new Date();
+        float time = (float) (date.getTime() - startTime) / 1000.0f;
+        GLES20.glUniform1f(iGlobalTime, time);
+        GLES20.glUniform4f(iChannelTime, time, time, time, time);  // ???
+        GLES20.glUniform3f(iChannelResolution, 0.0f, 0.0f, 0.0f);  // ???
+        // TODO: iChannel
+        GLES20.glUniform4f(iMouse, touchX, touchY, touchX, touchY);
+        GLES20.glUniform4f(iDate, date.getYear(), date.getMonth(), date.getDate(),
+                date.getHours() * 24 * 60 + date.getMinutes() * 60 + date.getSeconds()); // ???
+        GLES20.glUniform1f(iSampleRate, 44000.0f);
     }
 }

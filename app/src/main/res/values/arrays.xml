@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="shaders">
+        <item>First Item</item>
+        <item>Second Item</item>
+    </array>
+</resources>

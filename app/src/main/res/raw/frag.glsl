@@ -1,137 +1,249 @@
-// Oblivion radar
-//Sci-fi radar based on the work of gmunk for Oblivion
-//http://work.gmunk.com/OBLIVION-GFX
+// Created by inigo quilez - iq/2013
+// License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
-#define SMOOTH(r,R) (1.0-smoothstep(R-1.0,R+1.0, r))
-#define RANGE(a,b,x) ( step(a,x)*(1.0-step(b,x)) )
-#define RS(a,b,x) ( smoothstep(a-1.0,a+1.0,x)*(1.0-smoothstep(b-1.0,b+1.0,x)) )
-#define M_PI 3.1415926535897932384626433832795
+//stereo thanks to Croqueteer
+//#define STEREO 
 
-#define blue1 vec3(0.74,0.95,1.00)
-#define blue2 vec3(0.87,0.98,1.00)
-#define blue3 vec3(0.35,0.76,0.83)
-#define blue4 vec3(0.953,0.969,0.89)
-#define red   vec3(1.00,0.38,0.227)
-
-#define MOV(a,b,c,d,t) (vec2(a*cos(t)+b*cos(0.1*(t)), c*sin(t)+d*cos(0.1*(t))))
-
-float movingLine(vec2 uv, vec2 center, float radius)
+// value noise, and its analytical derivatives
+vec3 noised( in vec2 x )
 {
-    //angle of the line
-    float theta0 = 90.0 * iGlobalTime;
-    vec2 d = uv - center;
-    float r = sqrt( dot( d, d ) );
-    if(r<radius)
+    vec2 p = floor(x);
+    vec2 f = fract(x);
+    vec2 u = f*f*(3.0-2.0*f);
+	float a = texture2D(iChannel0,(p+vec2(0.5,0.5))/256.0,-100.0).x;
+	float b = texture2D(iChannel0,(p+vec2(1.5,0.5))/256.0,-100.0).x;
+	float c = texture2D(iChannel0,(p+vec2(0.5,1.5))/256.0,-100.0).x;
+	float d = texture2D(iChannel0,(p+vec2(1.5,1.5))/256.0,-100.0).x;
+	return vec3(a+(b-a)*u.x+(c-a)*u.y+(a-b-c+d)*u.x*u.y,
+				6.0*f*(1.0-f)*(vec2(b-a,c-a)+(a-b-c+d)*u.yx));
+}
+
+const mat2 m2 = mat2(0.8,-0.6,0.6,0.8);
+
+float terrain( in vec2 x )
+{
+	vec2  p = x*0.003;
+    float a = 0.0;
+    float b = 1.0;
+	vec2  d = vec2(0.0);
+    for( int i=0; i<6; i++ )
     {
-        //compute the distance to the line theta=theta0
-        vec2 p = radius*vec2(cos(theta0*M_PI/180.0),
-                            -sin(theta0*M_PI/180.0));
-        float l = length( d - p*clamp( dot(d,p)/dot(p,p), 0.0, 1.0) );
-    	d = normalize(d);
-        //compute gradient based on angle difference to theta0
-   	 	float theta = mod(180.0*atan(d.y,d.x)/M_PI+theta0,360.0);
-        float gradient = clamp(1.0-theta/90.0,0.0,1.0);
-        return SMOOTH(l,1.0)+0.5*gradient;
-    }
-    else return 0.0;
-}
-
-float circle(vec2 uv, vec2 center, float radius, float width)
-{
-    float r = length(uv - center);
-    return SMOOTH(r-width/2.0,radius)-SMOOTH(r+width/2.0,radius);
-}
-
-float circle2(vec2 uv, vec2 center, float radius, float width, float opening)
-{
-    vec2 d = uv - center;
-    float r = sqrt( dot( d, d ) );
-    d = normalize(d);
-    if( abs(d.y) > opening )
-	    return SMOOTH(r-width/2.0,radius)-SMOOTH(r+width/2.0,radius);
-    else
-        return 0.0;
-}
-float circle3(vec2 uv, vec2 center, float radius, float width)
-{
-    vec2 d = uv - center;
-    float r = sqrt( dot( d, d ) );
-    d = normalize(d);
-    float theta = 180.0*(atan(d.y,d.x)/M_PI);
-    return smoothstep(2.0, 2.1, abs(mod(theta+2.0,45.0)-2.0)) *
-        mix( 0.5, 1.0, step(45.0, abs(mod(theta, 180.0)-90.0)) ) *
-        (SMOOTH(r-width/2.0,radius)-SMOOTH(r+width/2.0,radius));
-}
-
-float triangles(vec2 uv, vec2 center, float radius)
-{
-    vec2 d = uv - center;
-    return RS(-8.0, 0.0, d.x-radius) * (1.0-smoothstep( 7.0+d.x-radius,9.0+d.x-radius, abs(d.y)))
-         + RS( 0.0, 8.0, d.x+radius) * (1.0-smoothstep( 7.0-d.x-radius,9.0-d.x-radius, abs(d.y)))
-         + RS(-8.0, 0.0, d.y-radius) * (1.0-smoothstep( 7.0+d.y-radius,9.0+d.y-radius, abs(d.x)))
-         + RS( 0.0, 8.0, d.y+radius) * (1.0-smoothstep( 7.0-d.y-radius,9.0-d.y-radius, abs(d.x)));
-}
-
-float cross(vec2 uv, vec2 center, float radius)
-{
-    vec2 d = uv - center;
-    int x = int(d.x);
-    int y = int(d.y);
-    float r = sqrt( dot( d, d ) );
-    if( (r<radius) && ( (x==y) || (x==-y) ) )
-        return 1.0;
-    else return 0.0;
-}
-float dots(vec2 uv, vec2 center, float radius)
-{
-    vec2 d = uv - center;
-    float r = sqrt( dot( d, d ) );
-    if( r <= 2.5 )
-        return 1.0;
-    if( ( r<= radius) && ( (abs(d.y+0.5)<=1.0) && ( mod(d.x+1.0, 50.0) < 2.0 ) ) )
-        return 1.0;
-    else if ( (abs(d.y+0.5)<=1.0) && ( r >= 50.0 ) && ( r < 115.0 ) )
-        return 0.5;
-    else
-	    return 0.0;
-}
-float bip1(vec2 uv, vec2 center)
-{
-    return SMOOTH(length(uv - center),3.0);
-}
-float bip2(vec2 uv, vec2 center)
-{
-    float r = length(uv - center);
-    float R = 8.0+mod(87.0*iGlobalTime, 80.0);
-    return (0.5-0.5*cos(30.0*iGlobalTime)) * SMOOTH(r,5.0)
-        + SMOOTH(6.0,r)-SMOOTH(8.0,r)
-        + smoothstep(max(8.0,R-20.0),R,r)-SMOOTH(R,r);
-}
-void main(void)
-{
-    vec3 finalColor;
-	vec2 uv = gl_FragCoord.xy;
-    //center of the image
-    vec2 c = iResolution.xy/2.0;
-    finalColor = vec3( 0.3*cross(uv, c, 240.0) );
-    finalColor += ( circle(uv, c, 100.0, 1.0)
-                  + circle(uv, c, 165.0, 1.0) ) * blue1;
-    finalColor += (circle(uv, c, 240.0, 2.0) );//+ dots(uv,c,240.0)) * blue4;
-    finalColor += circle3(uv, c, 313.0, 4.0) * blue1;
-    finalColor += triangles(uv, c, 315.0 + 30.0*sin(iGlobalTime)) * blue2;
-    finalColor += movingLine(uv, c, 240.0) * blue3;
-    finalColor += circle(uv, c, 10.0, 1.0) * blue3;
-    finalColor += 0.7 * circle2(uv, c, 262.0, 1.0, 0.5+0.2*cos(iGlobalTime)) * blue3;
-    if( length(uv-c) < 240.0 )
-    {
-        //animate some bips with random movements
-    	vec2 p = 130.0*MOV(1.3,1.0,1.0,1.4,3.0+0.1*iGlobalTime);
-   		finalColor += bip1(uv, c+p) * vec3(1,1,1);
-        p = 130.0*MOV(0.9,-1.1,1.7,0.8,-2.0+sin(0.1*iGlobalTime)+0.15*iGlobalTime);
-        finalColor += bip1(uv, c+p) * vec3(1,1,1);
-        p = 50.0*MOV(1.54,1.7,1.37,1.8,sin(0.1*iGlobalTime+7.0)+0.2*iGlobalTime);
-        finalColor += bip2(uv,c+p) * red;
+        vec3 n = noised(p);
+        d += n.yz;
+        a += b*n.x/(1.0+dot(d,d));
+		b *= 0.5;
+        p = m2*p*2.0;
     }
 
-    gl_FragColor = vec4( finalColor, 1.0 );
+	return 140.0*a;
+}
+
+float terrain2( in vec2 x )
+{
+	vec2  p = x*0.003;
+    float a = 0.0;
+    float b = 1.0;
+	vec2  d = vec2(0.0);
+    for( int i=0; i<14; i++ )
+    {
+        vec3 n = noised(p);
+        d += n.yz;
+        a += b*n.x/(1.0+dot(d,d));
+		b *= 0.5;
+        p = m2*p*2.0;
+    }
+
+	return 140.0*a;
+}
+
+float terrain3( in vec2 x )
+{
+	vec2  p = x*0.003;
+    float a = 0.0;
+    float b = 1.0;
+	vec2  d = vec2(0.0);
+    for( int i=0; i<4; i++ )
+    {
+        vec3 n = noised(p);
+        d += n.yz;
+        a += b*n.x/(1.0+dot(d,d));
+		b *= 0.5;
+        p = m2*p*2.0;
+    }
+
+	return 140.0*a;
+}
+
+float map( in vec3 p )
+{
+    return p.y - terrain(p.xz);
+}
+
+float interesct( in vec3 ro, in vec3 rd, in float tmin, in float tmax )
+{
+    float t = tmin;
+	for( int i=0; i<120; i++ )
+	{
+		float h = map( ro + t*rd );
+		if( h<(0.002*t) || t>tmax ) break;
+		t += 0.5*h;
+	}
+
+	return t;
+}
+
+float softShadow(in vec3 ro, in vec3 rd )
+{
+    // real shadows	
+    float res = 1.0;
+    float t = 0.001;
+	for( int i=0; i<48; i++ )
+	{
+	    vec3  p = ro + t*rd;
+        float h = map( p );
+		res = min( res, 16.0*h/t );
+		t += h;
+		if( res<0.001 ||p.y>200.0 ) break;
+	}
+	return clamp( res, 0.0, 1.0 );
+}
+
+vec3 calcNormal( in vec3 pos, float t )
+{
+    vec2  eps = vec2( 0.002*t, 0.0 );
+    return normalize( vec3( terrain2(pos.xz-eps.xy) - terrain2(pos.xz+eps.xy),
+                            2.0*eps.x,
+                            terrain2(pos.xz-eps.yx) - terrain2(pos.xz+eps.yx) ) );
+}
+
+vec3 camPath( float time )
+{
+	return 1100.0*vec3( cos(0.0+0.23*time), 0.0, cos(1.5+0.21*time) );
+}
+	
+float fbm( vec2 p )
+{
+    float f = 0.0;
+    f += 0.5000*texture2D( iChannel0, p/256.0 ).x; p = m2*p*2.02;
+    f += 0.2500*texture2D( iChannel0, p/256.0 ).x; p = m2*p*2.03;
+    f += 0.1250*texture2D( iChannel0, p/256.0 ).x; p = m2*p*2.01;
+    f += 0.0625*texture2D( iChannel0, p/256.0 ).x;
+    return f/0.9375;
+}
+
+void main( void )
+{
+    vec2 xy = -1.0 + 2.0*gl_FragCoord.xy/iResolution.xy;
+	vec2 s = xy*vec2(iResolution.x/iResolution.y,1.0);
+
+	#ifdef STEREO
+	float isCyan = mod(gl_FragCoord.x + mod(gl_FragCoord.y,2.0),2.0);
+    #endif
+	
+    float time = iGlobalTime*0.15 + 0.3 + 4.0*iMouse.x/iResolution.x;
+	
+	vec3 light1 = normalize( vec3(-0.8,0.4,-0.3) );
+
+    // camera position
+	vec3 ro = camPath( time );
+	vec3 ta = camPath( time + 3.0 );
+	ro.y = terrain3( ro.xz ) + 11.0;
+	ta.y = ro.y - 20.0;
+	float cr = 0.2*cos(0.1*time);
+
+    // camera ray    
+	vec3  cw = normalize(ta-ro);
+	vec3  cp = vec3(sin(cr), cos(cr),0.0);
+	vec3  cu = normalize( cross(cw,cp) );
+	vec3  cv = normalize( cross(cu,cw) );
+	vec3  rd = normalize( s.x*cu + s.y*cv + 2.0*cw );
+
+	#ifdef STEREO
+	ro += 2.0*cu*isCyan; // move camera to the right - the rd vector is still good
+    #endif
+    
+    // bounding plane
+    float tmin = 2.0;
+    float tmax = 2000.0;
+    float maxh = 210.0;
+    float tp = (maxh-ro.y)/rd.y;
+    if( tp>0.0 )
+    {
+        if( ro.y>maxh ) tmin = max( tmin, tp );
+        else            tmax = min( tmax, tp );
+    }
+
+	float sundot = clamp(dot(rd,light1),0.0,1.0);
+	vec3 col;
+    float t = interesct( ro, rd, tmin, tmax );
+    if( t>tmax)
+    {
+        // sky		
+		col = vec3(0.3,.55,0.8)*(1.0-0.8*rd.y)*0.9;
+        // sun
+		col += 0.25*vec3(1.0,0.7,0.4)*pow( sundot,5.0 );
+		col += 0.25*vec3(1.0,0.8,0.6)*pow( sundot,64.0 );
+		col += 0.2*vec3(1.0,0.8,0.6)*pow( sundot,512.0 );
+        // clouds
+		vec2 sc = ro.xz + rd.xz*(1000.0-ro.y)/rd.y;
+		col = mix( col, vec3(1.0,0.95,1.0), 0.5*smoothstep(0.5,0.8,fbm(0.0005*sc)) );
+        // horizon
+        col = mix( col, vec3(0.7,0.75,0.8), pow( 1.0-max(rd.y,0.0), 8.0 ) );
+	}
+	else
+	{
+        // mountains		
+		vec3 pos = ro + t*rd;
+        vec3 nor = calcNormal( pos, t );
+        vec3 ref = reflect( rd, nor );
+        float fre = clamp( 1.0+dot(rd,nor), 0.0, 1.0 );
+        
+        // rock
+		float r = texture2D( iChannel0, 7.0*pos.xz/256.0 ).x;
+        col = (r*0.25+0.75)*0.9*mix( vec3(0.08,0.05,0.03), vec3(0.10,0.09,0.08), texture2D(iChannel0,0.00007*vec2(pos.x,pos.y*48.0)).x );
+		col = mix( col, 0.20*vec3(0.45,.30,0.15)*(0.50+0.50*r),smoothstep(0.70,0.9,nor.y) );
+        col = mix( col, 0.15*vec3(0.30,.30,0.10)*(0.25+0.75*r),smoothstep(0.95,1.0,nor.y) );
+
+		// snow
+		float h = smoothstep(55.0,80.0,pos.y + 25.0*fbm(0.01*pos.xz) );
+        float e = smoothstep(1.0-0.5*h,1.0-0.1*h,nor.y);
+        float o = 0.3 + 0.7*smoothstep(0.0,0.1,nor.x+h*h);
+        float s = h*e*o;
+        col = mix( col, 0.29*vec3(0.62,0.65,0.7), smoothstep( 0.1, 0.9, s ) );
+		
+         // lighting		
+        float amb = clamp(0.5+0.5*nor.y,0.0,1.0);
+		float dif = clamp( dot( light1, nor ), 0.0, 1.0 );
+		float bac = clamp( 0.2 + 0.8*dot( normalize( vec3(-light1.x, 0.0, light1.z ) ), nor ), 0.0, 1.0 );
+		float sh = 1.0; if( dif>=0.0001 ) sh = softShadow(pos+light1*20.0,light1);
+		
+		vec3 lin  = vec3(0.0);
+		lin += dif*vec3(7.00,5.00,3.00)*vec3( sh, sh*sh*0.5+0.5*sh, sh*sh*0.8+0.2*sh );
+		lin += amb*vec3(0.40,0.60,0.80)*1.2;
+        lin += bac*vec3(0.40,0.50,0.60);
+		col *= lin;
+        
+        col += s*0.1*pow(fre,4.0)*vec3(7.0,5.0,3.0)*sh * pow( clamp(dot(light1,ref), 0.0, 1.0),16.0);
+        col += s*0.1*pow(fre,4.0)*vec3(0.4,0.5,0.6)*smoothstep(0.0,0.6,ref.y);
+
+		// fog
+        float fo = 1.0-exp(-0.0000011*t*t );
+        vec3 fco = 0.8*vec3(0.5,0.7,0.9) + 0.1*vec3(1.0,0.8,0.5)*pow( sundot, 4.0 );
+		col = mix( col, fco, fo );
+
+        // sun scatter
+		col += 0.3*vec3(1.0,0.8,0.4)*pow( sundot, 8.0 )*(1.0-exp(-0.002*t));
+	}
+
+    // gamma
+	col = pow(col,vec3(0.4545));
+
+    // vignetting	
+	col *= 0.5 + 0.5*pow( (xy.x+1.0)*(xy.y+1.0)*(xy.x-1.0)*(xy.y-1.0), 0.1 );
+	
+    #ifdef STEREO	
+    col *= vec3( isCyan, 1.0-isCyan, 1.0-isCyan );	
+	#endif
+	
+	gl_FragColor=vec4(col,1.0);
 }

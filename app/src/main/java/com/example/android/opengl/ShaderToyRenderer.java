@@ -3,6 +3,7 @@ package com.example.android.opengl;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -32,12 +33,15 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
             "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
 
+    private Context context;
+
     private int program;
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawOrderBuffer;
     private int drawOrderLength;
     private String vertexShaderSrc;
     private String fragmentShaderSrc;
+    private int[] textures = new int[4];
 
     private long startTime;  // time since epoch that we started.
     private int screenWidth, screenHeight;
@@ -56,7 +60,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-    public ShaderToyRenderer(String vSrc, String fSrc) {
+    public ShaderToyRenderer(Context context, String vSrc, String fSrc) {
+        this.context = context;
+
         startTime = new Date().getTime();
         vertexShaderSrc = vSrc;
         fragmentShaderSrc = fragmentSrcHeader + fSrc;
@@ -78,6 +84,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         iDate = GLES20.glGetUniformLocation(program, "iDate");
         iSampleRate = GLES20.glGetUniformLocation(program, "iSampleRate");
 
+        GLES20.glGenTextures(4, textures, 0);
+
         final float squareCoords[] = {
                 -1.0f, -1.0f, 0.0f,
                 -1.0f, 1.0f, 0.0f,
@@ -88,12 +96,19 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         vertexBuffer = createBuffer(squareCoords);
         drawOrderBuffer = createBuffer(drawOrder);
         drawOrderLength = drawOrder.length;
+
+        GLUtils.loadGLTexture(context, R.drawable.tex16, textures[0]);
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glUseProgram(program);
+
+        for (int i = 0; i < 3; ++i) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[i]);
+        }
 
         setShaderVariables();
         drawVertexBuffer(vertexBuffer, drawOrderBuffer, drawOrderLength);

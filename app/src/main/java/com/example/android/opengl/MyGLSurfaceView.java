@@ -34,7 +34,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
         String vSrc = GLUtils.loadText(context, R.raw.vertex);
         String fSrc = GLUtils.loadText(context, R.raw.frag);
-        mRenderer   = new ShaderToyRenderer(vSrc, fSrc);
+        mRenderer   = new ShaderToyRenderer(context, vSrc, fSrc);
 
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);

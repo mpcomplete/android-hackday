@@ -63,7 +63,7 @@ public class GLUtils {
     }
 
     // bitmap_resource = R.drawable.fist
-    public void loadGLTexture(Context context, int bitmapResource, int texture) {
+    public static void loadGLTexture(Context context, int bitmapResource, int texture) {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), bitmapResource);
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
@@ -73,8 +73,6 @@ public class GLUtils {
 
         bitmap.recycle();
     }
-
-    public void updateBuffer () {}
 
     public static void checkGlError(String glOperation) {
         int error;

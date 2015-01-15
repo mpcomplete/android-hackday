@@ -32,15 +32,21 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGLView = new MyGLSurfaceView(this);
+
+        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
+        shader.fragmentSrc = GLUtils.loadText(this, R.raw.frag);
+        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
+        mGLView = new MyGLSurfaceView(this, shader);
         setContentView(mGLView);
     }
 
     public boolean onCreateOptionsMenu (Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_menu, menu);
+        menu.getItem(0).getActionView().findViewById(R.id.spinner);
 
-        Spinner spinner = (Spinner) findViewById(R.id.menuSort);
+        Spinner spinner = (Spinner) menu.getItem(0).getActionView().findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(this);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -52,6 +58,17 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
         Object selected = parent.getItemAtPosition(pos);
         String name     = selected.toString();
         Log.d("Selection", name);
+
+        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
+        if (pos == 1) {
+            shader.fragmentSrc = GLUtils.loadText(this, R.raw.frag);
+            shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
+        } else {
+            shader.fragmentSrc = GLUtils.loadText(this, R.raw.clouds);
+            shader.textureResources = new int[]{R.drawable.tex16};
+        }
+        mGLView = new MyGLSurfaceView(this, shader);
+        setContentView(mGLView);
     }
 
     public void onNothingSelected(AdapterView<?> parent) {

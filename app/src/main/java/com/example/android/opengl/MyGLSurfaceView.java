@@ -28,15 +28,11 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     private final ShaderToyRenderer mRenderer;
 
-    public MyGLSurfaceView(Context context) {
+    public MyGLSurfaceView(Context context, ShaderToyRenderer.ShaderSpec shader) {
         super(context);
         setEGLContextClientVersion(2);
 
         mRenderer   = new ShaderToyRenderer(context);
-
-        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
-        shader.fragmentSrc = GLUtils.loadText(context, R.raw.frag);
-        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
         mRenderer.setShader(shader);
 
         setRenderer(mRenderer);
@@ -46,11 +42,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         mRenderer.onTouchEvent(e.getX(), e.getY());
-
-        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
-        shader.fragmentSrc = GLUtils.loadText(this.getContext(), R.raw.clouds);
-        shader.textureResources = new int[]{R.drawable.tex16};
-        mRenderer.setShader(shader);
 
         return true;
     }

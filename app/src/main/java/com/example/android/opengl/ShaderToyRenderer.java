@@ -24,6 +24,12 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     static final int COORDS_PER_VERTEX = 3;
     static final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4;
 
+    static final String vertexSrc =
+            "attribute vec4 vPosition;" +
+            "void main() {" +
+            "   gl_Position = vPosition;" +
+           "}";
+
     static final String fragmentSrcHeader =
             "precision mediump float;" +
             "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
@@ -44,7 +50,6 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawOrderBuffer;
     private int drawOrderLength;
-    private String vertexShaderSrc;
     private ShaderSpec shader;
     private GLUtils.Texture[] textures = new GLUtils.Texture[4];
 
@@ -65,11 +70,10 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-    public ShaderToyRenderer(Context context, String vSrc, String fSrc) {
+    public ShaderToyRenderer(Context context, String fSrc) {
         this.context = context;
 
         startTime = new Date().getTime();
-        vertexShaderSrc = vSrc;
         shader = new ShaderSpec();
         shader.fragmentSrc = fragmentSrcHeader + fSrc;
         shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
@@ -87,8 +91,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     }
 
     public void loadShader() {
-        String vertexSrc =
-        program = GLUtils.programFromSrc(vertexShaderSrc, shader.fragmentSrc);
+        program = GLUtils.programFromSrc(vertexSrc, shader.fragmentSrc);
 
         initShaderVariables();
 

@@ -32,9 +32,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         super(context);
         setEGLContextClientVersion(2);
 
-        mRenderer   = new ShaderToyRenderer(context);
-        mRenderer.setShader(shader);
-
+        mRenderer   = new ShaderToyRenderer(context, shader);
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
@@ -42,7 +40,6 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         mRenderer.onTouchEvent(e.getX(), e.getY());
-
         return true;
     }
 

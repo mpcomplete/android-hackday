@@ -70,8 +70,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-    public ShaderToyRenderer(Context context) {
+    public ShaderToyRenderer(Context context, ShaderSpec shader) {
         this.context = context;
+        this.shader = shader;
 
         startTime = new Date().getTime();
 
@@ -90,7 +91,14 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        loadShader();
+        program = GLUtils.programFromSrc(vertexSrc, fragmentSrcHeader + shader.fragmentSrc);
+
+        initShaderVariables();
+
+        for (int i = 0; i < shader.textureResources.length; ++i) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            textures[i] = GLUtils.loadGLTexture(context, shader.textureResources[i]);
+        }
     }
 
     @Override
@@ -113,24 +121,6 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     public void onTouchEvent(float x, float y) {
         touchX = x;
         touchY = y;
-    }
-
-    public void setShader(ShaderSpec shader) {
-        boolean surfaceCreated = (this.shader != null);
-        this.shader = shader;
-        if (surfaceCreated)
-            loadShader();
-    }
-
-    private void loadShader() {
-        program = GLUtils.programFromSrc(vertexSrc, fragmentSrcHeader + shader.fragmentSrc);
-
-        initShaderVariables();
-
-        for (int i = 0; i < shader.textureResources.length; ++i) {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
-            textures[i] = GLUtils.loadGLTexture(context, shader.textureResources[i]);
-        }
     }
 
     private void initShaderVariables() {

@@ -86,11 +86,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         drawOrderBuffer = createBuffer(drawOrder);
         drawOrderLength = drawOrder.length;
 
-        int[] textureNames = new int[4];
-        GLES20.glGenTextures(4, textureNames, 0);
-
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        textures[0] = GLUtils.loadGLTexture(context, R.drawable.tex16, textureNames[0]);
+        textures[0] = GLUtils.loadGLTexture(context, R.drawable.tex16);
     }
 
     @Override

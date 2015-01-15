@@ -69,16 +69,18 @@ public class GLUtils {
     }
 
     // bitmap_resource = R.drawable.fist
-    public static Texture loadGLTexture(Context context, int bitmapResource, int textureName) {
+    public static Texture loadGLTexture(Context context, int bitmapResource) {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), bitmapResource);
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);
+        int[] textureName = new int[1];
+        GLES20.glGenTextures(1, textureName, 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName[0]);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 
         Texture texture = new Texture();
-        texture.glName = textureName;
+        texture.glName = textureName[0];
         texture.width = bitmap.getWidth();
         texture.height = bitmap.getHeight();
 

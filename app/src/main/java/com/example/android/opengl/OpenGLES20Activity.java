@@ -47,8 +47,10 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
         }
     }
     private ShaderSpec[] shaders = new ShaderSpec[]{
-            new ShaderSpec("water", R.raw.pirates, new int[]{R.drawable.tex03, R.drawable.tex16}),
-            new ShaderSpec("clouds", R.raw.clouds, new int[]{R.drawable.tex16}),
+            new ShaderSpec("Water", R.raw.pirates, new int[]{R.drawable.tex03, R.drawable.tex16}),
+            new ShaderSpec("Clouds", R.raw.clouds, new int[]{R.drawable.tex16}),
+            new ShaderSpec("Voronoise", R.raw.voronoise, new int[0]),
+            new ShaderSpec("Sphere", R.raw.sphere, new int[]{}),
     };
     private GLSurfaceView mGLView;
 

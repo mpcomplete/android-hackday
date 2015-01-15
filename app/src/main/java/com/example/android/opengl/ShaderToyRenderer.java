@@ -26,23 +26,23 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
 
     static final String vertexSrc =
             "attribute vec4 vPosition;" +
-            "void main() {" +
-            "   gl_Position = vPosition;" +
-           "}";
+                    "void main() {" +
+                    "   gl_Position = vPosition;" +
+                    "}";
 
     static final String fragmentSrcHeader =
             "precision mediump float;" +
-            "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
-            "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
-            "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
-            "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
-            "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
-            "uniform sampler2D iChannel0;" +             // input channels x4. TODO: cube maps
-            "uniform sampler2D iChannel1;" +
-            "uniform sampler2D iChannel2;" +
-            "uniform sampler2D iChannel3;" +
-            "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
-            "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
+                    "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
+                    "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
+                    "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
+                    "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
+                    "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
+                    "uniform sampler2D iChannel0;" +             // input channels x4. TODO: cube maps
+                    "uniform sampler2D iChannel1;" +
+                    "uniform sampler2D iChannel2;" +
+                    "uniform sampler2D iChannel3;" +
+                    "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
+                    "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
 
     private Context context;
 
@@ -70,13 +70,10 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-    public ShaderToyRenderer(Context context, String fSrc) {
+    public ShaderToyRenderer(Context context) {
         this.context = context;
 
         startTime = new Date().getTime();
-        shader = new ShaderSpec();
-        shader.fragmentSrc = fragmentSrcHeader + fSrc;
-        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
 
         final float squareCoords[] = {
                 -1.0f, -1.0f, 0.0f,
@@ -88,17 +85,6 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         vertexBuffer = createBuffer(squareCoords);
         drawOrderBuffer = createBuffer(drawOrder);
         drawOrderLength = drawOrder.length;
-    }
-
-    public void loadShader() {
-        program = GLUtils.programFromSrc(vertexSrc, shader.fragmentSrc);
-
-        initShaderVariables();
-
-        for (int i = 0; i < shader.textureResources.length; ++i) {
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
-            textures[i] = GLUtils.loadGLTexture(context, shader.textureResources[i]);
-        }
     }
 
     @Override
@@ -129,34 +115,22 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         touchY = y;
     }
 
-    private static FloatBuffer createBuffer(float[] array) {
-        ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 4);  // 4 bytes per float
-        bb.order(ByteOrder.nativeOrder());
-        FloatBuffer buffer = bb.asFloatBuffer();
-        buffer.put(array);
-        buffer.position(0);
-        return buffer;
+    public void setShader(ShaderSpec shader) {
+        boolean surfaceCreated = (this.shader != null);
+        this.shader = shader;
+        if (surfaceCreated)
+            loadShader();
     }
 
-    private static ShortBuffer createBuffer(short[] array) {
-        ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 2);  // 2 bytes per short
-        bb.order(ByteOrder.nativeOrder());
-        ShortBuffer buffer = bb.asShortBuffer();
-        buffer.put(array);
-        buffer.position(0);
-        return buffer;
-    }
+    private void loadShader() {
+        program = GLUtils.programFromSrc(vertexSrc, fragmentSrcHeader + shader.fragmentSrc);
 
-    private void drawVertexBuffer(FloatBuffer vertexBuffer,
-                                  ShortBuffer drawOrderBuffer,
-                                  int drawOrderLength) {
-        GLES20.glEnableVertexAttribArray(vPosition);
-        GLES20.glVertexAttribPointer(
-            vPosition, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);
-        GLES20.glDrawElements(
-            GLES20.GL_TRIANGLES, drawOrderLength,
-            GLES20.GL_UNSIGNED_SHORT, drawOrderBuffer);
-        GLES20.glDisableVertexAttribArray(vPosition);
+        initShaderVariables();
+
+        for (int i = 0; i < shader.textureResources.length; ++i) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            textures[i] = GLUtils.loadGLTexture(context, shader.textureResources[i]);
+        }
     }
 
     private void initShaderVariables() {
@@ -192,5 +166,35 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniform4f(iDate, date.getYear(), date.getMonth(), date.getDate(),
                 date.getHours() * 24 * 60 + date.getMinutes() * 60 + date.getSeconds()); // ???
         GLES20.glUniform1f(iSampleRate, 44000.0f);
+    }
+
+    private static FloatBuffer createBuffer(float[] array) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 4);  // 4 bytes per float
+        bb.order(ByteOrder.nativeOrder());
+        FloatBuffer buffer = bb.asFloatBuffer();
+        buffer.put(array);
+        buffer.position(0);
+        return buffer;
+    }
+
+    private static ShortBuffer createBuffer(short[] array) {
+        ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 2);  // 2 bytes per short
+        bb.order(ByteOrder.nativeOrder());
+        ShortBuffer buffer = bb.asShortBuffer();
+        buffer.put(array);
+        buffer.position(0);
+        return buffer;
+    }
+
+    private void drawVertexBuffer(FloatBuffer vertexBuffer,
+                                  ShortBuffer drawOrderBuffer,
+                                  int drawOrderLength) {
+        GLES20.glEnableVertexAttribArray(vPosition);
+        GLES20.glVertexAttribPointer(
+                vPosition, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);
+        GLES20.glDrawElements(
+                GLES20.GL_TRIANGLES, drawOrderLength,
+                GLES20.GL_UNSIGNED_SHORT, drawOrderBuffer);
+        GLES20.glDisableVertexAttribArray(vPosition);
     }
 }

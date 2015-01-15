@@ -32,8 +32,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
         super(context);
         setEGLContextClientVersion(2);
 
-        String fSrc = GLUtils.loadText(context, R.raw.frag);
-        mRenderer   = new ShaderToyRenderer(context, fSrc);
+        mRenderer   = new ShaderToyRenderer(context);
+
+        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
+        shader.fragmentSrc = GLUtils.loadText(context, R.raw.frag);
+        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
+        mRenderer.setShader(shader);
 
         setRenderer(mRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);

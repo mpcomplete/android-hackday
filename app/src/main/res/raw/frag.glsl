@@ -1,94 +1,78 @@
-// Created by inigo quilez - iq/2013
+// Created by inigo quilez - iq/2014
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
-float noise( in vec3 x )
+
+// A simple and cheap 2D shader to accompany the Pirates of the Caribean music.
+
+
+float fbm( vec2 p )
 {
-    vec3 p = floor(x);
-    vec3 f = fract(x);
-	f = f*f*(3.0-2.0*f);
-	
-	vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
-	vec2 rg = texture2D( iChannel0, (uv+ 0.5)/256.0, -100.0 ).yx;
-	return mix( rg.x, rg.y, f.z );
+    return 0.5000*texture2D( iChannel1, p*1.00 ).x + 
+           0.2500*texture2D( iChannel1, p*2.02 ).x + 
+           0.1250*texture2D( iChannel1, p*4.03 ).x + 
+           0.0625*texture2D( iChannel1, p*8.04 ).x;
 }
 
-vec4 map( in vec3 p )
+void main( void )
 {
-	vec3 q = p - vec3(1.0,0.1,0.0)*iGlobalTime;
-    
-	float f;
-    f  = 0.50000*noise( q ); q = q*2.02;
-    f += 0.25000*noise( q ); q = q*2.03;
-    f += 0.12500*noise( q ); q = q*2.01;
-    f += 0.06250*noise( q ); q = q*2.02;
-    f += 0.03125*noise( q );
+    float time = mod( iGlobalTime, 60.0 );
+	vec2 p = (-iResolution.xy+2.0*gl_FragCoord.xy) / iResolution.y;
+    vec2 i = p;
 
-	float d = clamp( -0.3 - p.y + 3.5*f, 0.0, 1.0 );
-	
-	return vec4( mix( 1.15*vec3(1.0,0.95,0.8), vec3(0.7,0.7,0.7), d ), d );
-}
-
-vec3 sundir = normalize( vec3(-1.0,0.0,-0.1) );
-
-vec4 raymarch( in vec3 ro, in vec3 rd, in vec3 bgcol )
-{
-	vec4 sum = vec4(0, 0, 0, 0);
-
-	float t = 0.0;
-	for(int i=0; i<64; i++)
-	{
-		if( sum.a > 0.99 ) break;
-
-		vec3 pos = ro + t*rd;
-		vec4 col = map( pos );
-		
-		float dif =  clamp((col.w - map(pos+0.3*sundir).w)/0.6, 0.0, 1.0 );
-        vec3 lin = vec3(0.65,0.68,0.7)*1.3 + 0.5*vec3(0.7, 0.5, 0.3)*dif;        
-		col.xyz *= lin;
-        //col.xyz = mix( col.xyz, bgcol, 1.0-exp(-0.05*t) );
-		
-		col.a *= 0.35;
-		col.rgb *= col.a;
-
-		sum = sum + col*(1.0 - sum.a);
-
-        #if 0
-		t += 0.1;
-		#else
-		t += max(0.1,0.025*t);
-		#endif
-	}
-
-	sum.xyz /= (0.001+sum.w);
-
-	return clamp( sum, 0.0, 1.0 );
-}
-
-void main(void)
-{
-    vec2 p = (-iResolution.xy + 2.0*gl_FragCoord.xy)/ iResolution.y;
-
-    vec2 mo = -1.0 + 2.0*iMouse.xy / iResolution.xy;
-    
     // camera
-    vec3 ro = 4.0*normalize(vec3(cos(2.75-3.0*mo.x), 0.7+(mo.y+1.0), sin(2.75-3.0*mo.x)));
-	vec3 ta = vec3(0.0, 1.0, 0.0);
-    vec3 ww = normalize( ta - ro);
-    vec3 uu = normalize(cross( vec3(0.0,1.0,0.0), ww ));
-    vec3 vv = normalize(cross(ww,uu));
-    vec3 rd = normalize( p.x*uu + p.y*vv + 1.5*ww );
-
-    // background sky     
-	float sun = clamp( dot(sundir,rd), 0.0, 1.0 );
-	vec3 col = vec3(0.6,0.71,0.75) - rd.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
-	col += 0.2*vec3(1.0,.6,0.1)*pow( sun, 8.0 );
-
-    // clouds    
-    vec4 res = raymarch( ro, rd, col );
-    col = mix( col, res.xyz, res.w );
+    p += vec2(1.0,3.0)*0.001*2.0*cos( iGlobalTime*5.0 + vec2(0.0,1.5) );    
+    p += vec2(1.0,3.0)*0.001*1.0*cos( iGlobalTime*9.0 + vec2(1.0,4.5) );    
+    p *= 0.85 + 0.05*length(p);
+    float an = 0.3*sin( 0.1*time );
+    float co = cos(an);
+    float si = sin(an);
+    p = mat2( co, -si, si, co )*p;
     
-    // sun glare    
-	col += 0.1*vec3(1.0,0.4,0.2)*pow( sun, 3.0 );
+    // water
+    vec2 q = vec2(p.x,1.0)/p.y;
+    q.y -= 0.9*time;    
+    vec2 off = texture2D( iChannel0, 0.1*q*vec2(1.0,2.0) - vec2(0.0,0.007*iGlobalTime) ).xy;
+    q += 0.4*(-1.0 + 2.0*off);
+    vec3 col = texture2D( iChannel0, 0.1*q *vec2(.5,8.0) + vec2(0.0,0.01*iGlobalTime) ).zyx;
+    col *= 0.4;
+    float re = 1.0-smoothstep( 0.0, 0.7, abs(p.x-0.6) - abs(p.y)*0.5+0.2 );
+    col += 1.0*vec3(1.0,0.9,0.73)*re*0.2*off.y*5.0*(1.0-col.x);
+    float re2 = 1.0-smoothstep( 0.0, 2.0, abs(p.x-0.6) - abs(p.y)*0.85 );
+    col += 0.7*re2*smoothstep(0.35,1.0,texture2D( iChannel1, 0.1*q *vec2(0.5,8.0) ).x);
+    
+    // sky
+    vec3 sky = vec3(0.0,0.05,0.1)*1.4;
+    // stars    
+    sky += 0.5*smoothstep( 0.95,1.00,texture2D( iChannel1, 0.25*p ).x);
+    sky += 0.5*smoothstep( 0.85,1.0,texture2D( iChannel1, 0.25*p ).x);
+    sky += 0.2*pow(1.0-max(0.0,p.y),2.0);
+    // clouds    
+    float f = fbm( 0.002*vec2(p.x,1.0)/p.y );
+    vec3 cloud = vec3(0.3,0.4,0.5)*0.7*(1.0-0.85*sqrt(smoothstep(0.4,1.0,f)));
+    sky = mix( sky, cloud, 0.95*smoothstep( 0.4, 0.6, f ) );
+    sky = mix( sky, vec3(0.33,0.34,0.35), pow(1.0-max(0.0,p.y),2.0) );
+    col = mix( col, sky, smoothstep(0.0,0.1,p.y) );
+    
+    // horizon
+    col += 0.1*pow(clamp(1.0-abs(p.y),0.0,1.0),9.0);
+
+    // moon
+    float d = length(p-vec2(0.6,0.5));
+    float g = 1.0 - smoothstep( 0.2, 0.22, d );
+    float moontex = 0.8+0.2*smoothstep(0.25,0.7,fbm(0.06*p));
+    vec3 moon = vec3(1.0,0.97,0.9)*(1.0-0.1*smoothstep(0.2,0.5,f));
+    col += 0.8*moon*exp(-4.0*d)*vec3(1.1,1.0,0.8);
+    col += 0.2*moon*exp(-2.0*d);
+    col = mix( col, moon*moontex, g );
+    
+    // postprocess
+    col *= 1.4;
+    col = pow( col, vec3(1.5,1.2,1.0) );    
+    col *= clamp(1.0-0.3*length(i), 0.0, 1.0 );
+
+    // fade
+    col *=       smoothstep(  3.0,  6.0, time );
+    col *= 1.0 - smoothstep( 44.0, 50.0, time );
 
     gl_FragColor = vec4( col, 1.0 );
 }

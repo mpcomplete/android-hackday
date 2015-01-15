@@ -12,6 +12,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class GLUtils {
+    public static class Texture {
+        public int glName;
+        public int width;
+        public int height;
+    }
+
     public static int createShader (int type, String src) {
         int shader = GLES20.glCreateShader(type);
 
@@ -63,15 +69,22 @@ public class GLUtils {
     }
 
     // bitmap_resource = R.drawable.fist
-    public static void loadGLTexture(Context context, int bitmapResource, int texture) {
+    public static Texture loadGLTexture(Context context, int bitmapResource, int textureName) {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), bitmapResource);
 
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureName);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 
+        Texture texture = new Texture();
+        texture.glName = textureName;
+        texture.width = bitmap.getWidth();
+        texture.height = bitmap.getHeight();
+
         bitmap.recycle();
+
+        return texture;
     }
 
     public static void checkGlError(String glOperation) {

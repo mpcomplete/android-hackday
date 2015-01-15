@@ -114,7 +114,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         touchY = y;
     }
 
-    public static FloatBuffer createBuffer(float[] array) {
+    private static FloatBuffer createBuffer(float[] array) {
         ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 4);  // 4 bytes per float
         bb.order(ByteOrder.nativeOrder());
         FloatBuffer buffer = bb.asFloatBuffer();
@@ -123,7 +123,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         return buffer;
     }
 
-    public static ShortBuffer createBuffer(short[] array) {
+    private static ShortBuffer createBuffer(short[] array) {
         ByteBuffer bb = ByteBuffer.allocateDirect(array.length * 2);  // 2 bytes per short
         bb.order(ByteOrder.nativeOrder());
         ShortBuffer buffer = bb.asShortBuffer();
@@ -132,9 +132,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         return buffer;
     }
 
-    public void drawVertexBuffer(FloatBuffer vertexBuffer,
-                                 ShortBuffer drawOrderBuffer,
-                                 int drawOrderLength) {
+    private void drawVertexBuffer(FloatBuffer vertexBuffer,
+                                  ShortBuffer drawOrderBuffer,
+                                  int drawOrderLength) {
         GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glVertexAttribPointer(
             vPosition, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, VERTEX_STRIDE, vertexBuffer);

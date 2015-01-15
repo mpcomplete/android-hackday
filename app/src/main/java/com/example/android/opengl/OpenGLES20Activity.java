@@ -23,51 +23,48 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSelectedListener {
+import java.util.ArrayList;
+import java.util.List;
 
+public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSelectedListener {
+    private ShaderToyRenderer.ShaderSpec[] shaders = new ShaderToyRenderer.ShaderSpec[]{
+            new ShaderToyRenderer.ShaderSpec(R.raw.pirates, new int[]{R.drawable.tex03, R.drawable.tex16}),
+            new ShaderToyRenderer.ShaderSpec(R.raw.clouds, new int[]{R.drawable.tex16}),
+    };
     private GLSurfaceView mGLView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
-        shader.fragmentSrc = GLUtils.loadText(this, R.raw.frag);
-        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
-        mGLView = new MyGLSurfaceView(this, shader);
+        for (int i = 0; i < shaders.length; ++i)
+            shaders[i].fragmentSrc = GLUtils.loadText(this, shaders[i].fragmentSrcResource);
+        mGLView = new MyGLSurfaceView(this, shaders[0]);
         setContentView(mGLView);
     }
 
     public boolean onCreateOptionsMenu (Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_menu, menu);
-        menu.getItem(0).getActionView().findViewById(R.id.spinner);
 
         Spinner spinner = (Spinner) menu.getItem(0).getActionView().findViewById(R.id.spinner);
+        List<String> list = new ArrayList<String>();
+        for (int i = 0; i < shaders.length; ++i)
+            list.add("shader");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
         spinner.setOnItemSelectedListener(this);
+
         return super.onCreateOptionsMenu(menu);
     }
 
-    public void onItemSelected(AdapterView<?> parent,
-                               View view,
-                               int pos,
-                               long id) {
-
-        Object selected = parent.getItemAtPosition(pos);
-        String name     = selected.toString();
-        Log.d("Selection", name);
-
-        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
-        if (pos == 1) {
-            shader.fragmentSrc = GLUtils.loadText(this, R.raw.frag);
-            shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
-        } else {
-            shader.fragmentSrc = GLUtils.loadText(this, R.raw.clouds);
-            shader.textureResources = new int[]{R.drawable.tex16};
-        }
-        mGLView = new MyGLSurfaceView(this, shader);
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        mGLView = new MyGLSurfaceView(this, shaders[pos]);
         setContentView(mGLView);
     }
 

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="country_prompt">Choose</string>
-    <string-array name="shaders">
-        <item>First Item</item>
-        <item>Second Item</item>
-    </string-array>
-</resources>

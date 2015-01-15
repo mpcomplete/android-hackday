@@ -17,8 +17,14 @@ import java.util.Date;
 
 public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     public static class ShaderSpec {
+        int fragmentSrcResource;
         String fragmentSrc;
         int[] textureResources;
+
+        ShaderSpec(int fragmentSrcResource, int[] textureResources) {
+            this.fragmentSrcResource = fragmentSrcResource;
+            this.textureResources = textureResources;
+        }
     }
 
     static final int COORDS_PER_VERTEX = 3;
@@ -26,23 +32,23 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
 
     static final String vertexSrc =
             "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    "   gl_Position = vPosition;" +
-                    "}";
+            "void main() {" +
+            "   gl_Position = vPosition;" +
+            "}";
 
     static final String fragmentSrcHeader =
             "precision mediump float;" +
-                    "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
-                    "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
-                    "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
-                    "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
-                    "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
-                    "uniform sampler2D iChannel0;" +             // input channels x4. TODO: cube maps
-                    "uniform sampler2D iChannel1;" +
-                    "uniform sampler2D iChannel2;" +
-                    "uniform sampler2D iChannel3;" +
-                    "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
-                    "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
+            "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
+            "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
+            "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
+            "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
+            "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
+            "uniform sampler2D iChannel0;" +             // input channels x4. TODO: cube maps
+            "uniform sampler2D iChannel1;" +
+            "uniform sampler2D iChannel2;" +
+            "uniform sampler2D iChannel3;" +
+            "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
+            "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
 
     private Context context;
 

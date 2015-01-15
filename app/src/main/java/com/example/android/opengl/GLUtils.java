@@ -1,6 +1,8 @@
 package com.example.android.opengl;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.util.Log;
 
@@ -58,6 +60,18 @@ public class GLUtils {
             e.printStackTrace();
         }
         return text;
+    }
+
+    // bitmap_resource = R.drawable.fist
+    public void loadGLTexture(Context context, int bitmapResource, int texture) {
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), bitmapResource);
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+        android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+        bitmap.recycle();
     }
 
     public void updateBuffer () {}

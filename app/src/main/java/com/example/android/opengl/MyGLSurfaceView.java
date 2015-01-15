@@ -28,7 +28,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     private final ShaderToyRenderer mRenderer;
 
-    public MyGLSurfaceView(Context context, ShaderToyRenderer.ShaderSpec shader) {
+    public MyGLSurfaceView(Context context, ShaderToyRenderer.Shader shader) {
         super(context);
         setEGLContextClientVersion(2);
 

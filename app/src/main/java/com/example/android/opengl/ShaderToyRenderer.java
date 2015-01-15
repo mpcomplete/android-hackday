@@ -16,13 +16,12 @@ import java.nio.ShortBuffer;
 import java.util.Date;
 
 public class ShaderToyRenderer implements GLSurfaceView.Renderer {
-    public static class ShaderSpec {
-        int fragmentSrcResource;
+    public static class Shader {
         String fragmentSrc;
         int[] textureResources;
 
-        ShaderSpec(int fragmentSrcResource, int[] textureResources) {
-            this.fragmentSrcResource = fragmentSrcResource;
+        Shader(String fragmentSrc, int[] textureResources) {
+            this.fragmentSrc = fragmentSrc;
             this.textureResources = textureResources;
         }
     }
@@ -56,7 +55,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawOrderBuffer;
     private int drawOrderLength;
-    private ShaderSpec shader;
+    private Shader shader;
     private GLUtils.Texture[] textures = new GLUtils.Texture[4];
 
     private long startTime;  // time since epoch that we started.
@@ -76,7 +75,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iDate;
     private int iSampleRate;
 
-    public ShaderToyRenderer(Context context, ShaderSpec shader) {
+    public ShaderToyRenderer(Context context, Shader shader) {
         this.context = context;
         this.shader = shader;
 

@@ -87,7 +87,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         drawOrderLength = drawOrder.length;
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        textures[0] = GLUtils.loadGLTexture(context, R.drawable.tex16);
+        textures[0] = GLUtils.loadGLTexture(context, R.drawable.tex03);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + 1);
+        textures[1] = GLUtils.loadGLTexture(context, R.drawable.tex16);
     }
 
     @Override
@@ -164,6 +166,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniform1f(iGlobalTime, time);
         GLES20.glUniform4f(iChannelTime, time, time, time, time);
         for (int i = 0; i < 4; ++i) {
+            if (textures[i] == null)
+                continue;
             float width = textures[i].width;
             float height = textures[i].height;
             GLES20.glUniform3f(iChannelResolution, width, height, width / height);

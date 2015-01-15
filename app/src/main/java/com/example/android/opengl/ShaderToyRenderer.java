@@ -25,7 +25,10 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)
             "uniform vec3      iChannelResolution[4];" + // channel resolution (in pixels)
             "uniform vec4      iMouse;" +                // mouse pixel coords. xy: current (if MLB down), zw: click
-            //"uniform samplerXX iChannel0..3;" +          // input channel. XX = 2D/Cube
+            "uniform sampler2D iChannel0;" +             // input channels x4. TODO: cube maps
+            "uniform sampler2D iChannel1;" +
+            "uniform sampler2D iChannel2;" +
+            "uniform sampler2D iChannel3;" +
             "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
             "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
 
@@ -49,7 +52,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private int iChannelTime;
     private int iChannelResolution;
     private int iMouse;
-    private int iChannel;
+    private int[] iChannel = new int[4];
     private int iDate;
     private int iSampleRate;
 
@@ -70,7 +73,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         iChannelTime = GLES20.glGetUniformLocation(program, "iChannelTime");
         iChannelResolution = GLES20.glGetUniformLocation(program, "iChannelResolution");
         iMouse = GLES20.glGetUniformLocation(program, "iMouse");
-        iChannel = GLES20.glGetUniformLocation(program, "iChannel");
+        for (int i = 0; i < 3; ++i)
+            iChannel[i] = GLES20.glGetUniformLocation(program, "iChannel" + Integer.toString(i));
         iDate = GLES20.glGetUniformLocation(program, "iDate");
         iSampleRate = GLES20.glGetUniformLocation(program, "iSampleRate");
 
@@ -147,7 +151,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniform1f(iGlobalTime, time);
         GLES20.glUniform4f(iChannelTime, time, time, time, time);  // ???
         GLES20.glUniform3f(iChannelResolution, 0.0f, 0.0f, 0.0f);  // ???
-        // TODO: iChannel
+        for (int i = 0; i < 3; ++i)
+            GLES20.glUniform1i(iChannel[i], i);
         GLES20.glUniform4f(iMouse, touchX, touchY, touchX, touchY);
         GLES20.glUniform4f(iDate, date.getYear(), date.getMonth(), date.getDate(),
                 date.getHours() * 24 * 60 + date.getMinutes() * 60 + date.getSeconds()); // ???

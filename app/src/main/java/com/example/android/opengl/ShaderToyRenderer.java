@@ -16,6 +16,11 @@ import java.nio.ShortBuffer;
 import java.util.Date;
 
 public class ShaderToyRenderer implements GLSurfaceView.Renderer {
+    public static class ShaderSpec {
+        String fragmentSrc;
+        int[] textureResources;
+    }
+
     static final int COORDS_PER_VERTEX = 3;
     static final int VERTEX_STRIDE = COORDS_PER_VERTEX * 4;
 
@@ -40,7 +45,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
     private ShortBuffer drawOrderBuffer;
     private int drawOrderLength;
     private String vertexShaderSrc;
-    private String fragmentShaderSrc;
+    private ShaderSpec shader;
     private GLUtils.Texture[] textures = new GLUtils.Texture[4];
 
     private long startTime;  // time since epoch that we started.
@@ -65,15 +70,9 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
 
         startTime = new Date().getTime();
         vertexShaderSrc = vSrc;
-        fragmentShaderSrc = fragmentSrcHeader + fSrc;
-    }
-
-    @Override
-    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        program = GLUtils.programFromSrc(vertexShaderSrc, fragmentShaderSrc);
-
-        initShaderVariables();
+        shader = new ShaderSpec();
+        shader.fragmentSrc = fragmentSrcHeader + fSrc;
+        shader.textureResources = new int[]{R.drawable.tex03, R.drawable.tex16};
 
         final float squareCoords[] = {
                 -1.0f, -1.0f, 0.0f,
@@ -85,11 +84,24 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         vertexBuffer = createBuffer(squareCoords);
         drawOrderBuffer = createBuffer(drawOrder);
         drawOrderLength = drawOrder.length;
+    }
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        textures[0] = GLUtils.loadGLTexture(context, R.drawable.tex03);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + 1);
-        textures[1] = GLUtils.loadGLTexture(context, R.drawable.tex16);
+    public void loadShader() {
+        String vertexSrc =
+        program = GLUtils.programFromSrc(vertexShaderSrc, shader.fragmentSrc);
+
+        initShaderVariables();
+
+        for (int i = 0; i < shader.textureResources.length; ++i) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + i);
+            textures[i] = GLUtils.loadGLTexture(context, shader.textureResources[i]);
+        }
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        loadShader();
     }
 
     @Override

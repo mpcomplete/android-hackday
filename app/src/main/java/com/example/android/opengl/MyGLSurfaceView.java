@@ -46,6 +46,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         mRenderer.onTouchEvent(e.getX(), e.getY());
+
+        ShaderToyRenderer.ShaderSpec shader = new ShaderToyRenderer.ShaderSpec();
+        shader.fragmentSrc = GLUtils.loadText(this.getContext(), R.raw.clouds);
+        shader.textureResources = new int[]{R.drawable.tex16};
+        mRenderer.setShader(shader);
+
         return true;
     }
 

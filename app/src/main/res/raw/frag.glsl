@@ -7,9 +7,9 @@
 
 float fbm( vec2 p )
 {
-    return 0.5000*texture2D( iChannel1, p*1.00 ).x + 
-           0.2500*texture2D( iChannel1, p*2.02 ).x + 
-           0.1250*texture2D( iChannel1, p*4.03 ).x + 
+    return 0.5000*texture2D( iChannel1, p*1.00 ).x +
+           0.2500*texture2D( iChannel1, p*2.02 ).x +
+           0.1250*texture2D( iChannel1, p*4.03 ).x +
            0.0625*texture2D( iChannel1, p*8.04 ).x;
 }
 
@@ -20,17 +20,17 @@ void main( void )
     vec2 i = p;
 
     // camera
-    p += vec2(1.0,3.0)*0.001*2.0*cos( iGlobalTime*5.0 + vec2(0.0,1.5) );    
-    p += vec2(1.0,3.0)*0.001*1.0*cos( iGlobalTime*9.0 + vec2(1.0,4.5) );    
+    p += vec2(1.0,3.0)*0.001*2.0*cos( iGlobalTime*5.0 + vec2(0.0,1.5) );
+    p += vec2(1.0,3.0)*0.001*1.0*cos( iGlobalTime*9.0 + vec2(1.0,4.5) );
     p *= 0.85 + 0.05*length(p);
     float an = 0.3*sin( 0.1*time );
     float co = cos(an);
     float si = sin(an);
     p = mat2( co, -si, si, co )*p;
-    
+
     // water
     vec2 q = vec2(p.x,1.0)/p.y;
-    q.y -= 0.9*time;    
+    q.y -= 0.9*time;
     vec2 off = texture2D( iChannel0, 0.1*q*vec2(1.0,2.0) - vec2(0.0,0.007*iGlobalTime) ).xy;
     q += 0.4*(-1.0 + 2.0*off);
     vec3 col = texture2D( iChannel0, 0.1*q *vec2(.5,8.0) + vec2(0.0,0.01*iGlobalTime) ).zyx;
@@ -39,20 +39,20 @@ void main( void )
     col += 1.0*vec3(1.0,0.9,0.73)*re*0.2*off.y*5.0*(1.0-col.x);
     float re2 = 1.0-smoothstep( 0.0, 2.0, abs(p.x-0.6) - abs(p.y)*0.85 );
     col += 0.7*re2*smoothstep(0.35,1.0,texture2D( iChannel1, 0.1*q *vec2(0.5,8.0) ).x);
-    
+
     // sky
     vec3 sky = vec3(0.0,0.05,0.1)*1.4;
-    // stars    
+    // stars
     sky += 0.5*smoothstep( 0.95,1.00,texture2D( iChannel1, 0.25*p ).x);
     sky += 0.5*smoothstep( 0.85,1.0,texture2D( iChannel1, 0.25*p ).x);
     sky += 0.2*pow(1.0-max(0.0,p.y),2.0);
-    // clouds    
+    // clouds
     float f = fbm( 0.002*vec2(p.x,1.0)/p.y );
     vec3 cloud = vec3(0.3,0.4,0.5)*0.7*(1.0-0.85*sqrt(smoothstep(0.4,1.0,f)));
     sky = mix( sky, cloud, 0.95*smoothstep( 0.4, 0.6, f ) );
     sky = mix( sky, vec3(0.33,0.34,0.35), pow(1.0-max(0.0,p.y),2.0) );
     col = mix( col, sky, smoothstep(0.0,0.1,p.y) );
-    
+
     // horizon
     col += 0.1*pow(clamp(1.0-abs(p.y),0.0,1.0),9.0);
 
@@ -64,10 +64,10 @@ void main( void )
     col += 0.8*moon*exp(-4.0*d)*vec3(1.1,1.0,0.8);
     col += 0.2*moon*exp(-2.0*d);
     col = mix( col, moon*moontex, g );
-    
+
     // postprocess
     col *= 1.4;
-    col = pow( col, vec3(1.5,1.2,1.0) );    
+    col = pow( col, vec3(1.5,1.2,1.0) );
     col *= clamp(1.0-0.3*length(i), 0.0, 1.0 );
 
     // fade

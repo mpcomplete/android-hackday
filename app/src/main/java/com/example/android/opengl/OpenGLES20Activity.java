@@ -41,11 +41,13 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
             this.fragmentSrcResource = fragmentSrcResource;
             this.textureResources = textureResources;
         }
+
         ShaderToyRenderer.Shader load(Context context) {
             String fragmentSrc = GLUtils.loadText(context, fragmentSrcResource);
             return new ShaderToyRenderer.Shader(fragmentSrc, textureResources);
         }
     }
+
     private ShaderSpec[] shaders = new ShaderSpec[]{
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),
             new ShaderSpec("Voronoise", R.raw.voronoise, new int[]{}),
@@ -56,20 +58,22 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
             new ShaderSpec("Plasma Triangle", R.raw.plasma_triangle, new int[]{R.drawable.tex11}),
             new ShaderSpec("Heart", R.raw.heart, new int[]{}),
             new ShaderSpec("LSD", R.raw.simple_plasma, new int[]{}),
+            new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
             // These are too slow.
 //            new ShaderSpec("Clouds", R.raw.clouds, new int[]{R.drawable.tex16}),
 //            new ShaderSpec("Galaxy", R.raw.galaxy, new int[]{R.drawable.tex16}),
     };
+    private int selectedShader = 0;
     private GLSurfaceView mGLView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if (savedInstanceState != null)
+            selectedShader = savedInstanceState.getInt("selectedShader");
         super.onCreate(savedInstanceState);
-        mGLView = new MyGLSurfaceView(this, shaders[0].load(this));
-        setContentView(mGLView);
     }
 
-    public boolean onCreateOptionsMenu (Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_menu, menu);
 
@@ -82,11 +86,13 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
         spinner.setOnItemSelectedListener(this);
+        spinner.setSelection(selectedShader);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        selectedShader = pos;
         mGLView = new MyGLSurfaceView(this, shaders[pos].load(this));
         setContentView(mGLView);
     }
@@ -96,14 +102,21 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("selectedShader", selectedShader);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        mGLView.onPause();
+        if (mGLView != null)
+            mGLView.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mGLView.onResume();
+        if (mGLView != null)
+            mGLView.onResume();
     }
 }

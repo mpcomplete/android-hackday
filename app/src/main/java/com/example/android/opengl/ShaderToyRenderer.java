@@ -36,7 +36,7 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             "}";
 
     static final String fragmentSrcHeader =
-            "precision mediump float;" +
+            "precision highp float;" +
             "uniform vec3      iResolution;" +           // viewport resolution (in pixels)
             "uniform float     iGlobalTime;" +           // shader playback time (in seconds)
             "uniform float     iChannelTime[4];" +       // channel playback time (in seconds)

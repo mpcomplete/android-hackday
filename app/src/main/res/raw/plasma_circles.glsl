@@ -30,13 +30,13 @@ void main(void)
     // Third set:
     p = uv;
     p.y += sin(10.*p.x)*sin(2.3*p.y + 2.*time);
-    p.x += sin(p.y)*sin(p.x) + 0.5*sin(time);
+    p.x += sin(p.y)*sin(p.x) + sin(time);
     sets[2] = circle(mod(p*.4, .2)*4.);
 
     // Fourth set:
     p = uv;
     p.y += sin(5.*p.x)*sin(2.*p.y + 1.4*time);
-    p.x += sin(5.*p.y)*sin(p.x) + 0.5*sin(time);
+    p.x += sin(5.*p.y)*sin(p.x) + sin(time);
     sets[3] = circle(mod(p, .4)*3.);
 
     // Fifth set:

@@ -49,6 +49,8 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     }
 
     private ShaderSpec[] shaders = new ShaderSpec[]{
+            new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
+            new ShaderSpec("Plasma circles", R.raw.plasma_circles, new int[]{}),
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),
             new ShaderSpec("Voronoise", R.raw.voronoise, new int[]{}),
             new ShaderSpec("Sphere", R.raw.sphere, new int[]{}),
@@ -58,7 +60,6 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
             new ShaderSpec("Plasma Triangle", R.raw.plasma_triangle, new int[]{R.drawable.tex11}),
             new ShaderSpec("Heart", R.raw.heart, new int[]{}),
             new ShaderSpec("LSD", R.raw.simple_plasma, new int[]{}),
-            new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
             // These are too slow.
 //            new ShaderSpec("Clouds", R.raw.clouds, new int[]{R.drawable.tex16}),
 //            new ShaderSpec("Galaxy", R.raw.galaxy, new int[]{R.drawable.tex16}),

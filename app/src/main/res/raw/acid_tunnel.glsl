@@ -11,12 +11,12 @@ vec4 gradient(float f)
 
 float offset(float th)
 {
-    return .5*sin(25.*th)*sin(1.*time);
+    return .5*sin(25.*th)*sin(time);
 }
 
 vec4 tunnel(float th, float radius)
 {
-	return gradient(offset(th + time) + 3.*log(3.*radius) - 2.*time);
+	return gradient(offset(th + .5*time) + 3.*log(3.*radius) - 2.*time);
 }
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )

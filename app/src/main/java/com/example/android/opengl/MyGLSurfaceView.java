@@ -40,7 +40,8 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        mRenderer.onTouchEvent(e.getX(), e.getY());
+        mRenderer.onTouchEvent(e.getX(), e.getY(),
+                (e.getActionMasked() & MotionEvent.ACTION_UP) != 0);
         return true;
     }
 

@@ -78,8 +78,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     p.x *= iResolution.x/iResolution.y;
 
     float zoom = 1./(250. + 100.*(1. + sin(time)));
-	p = vec2(-0.533516,0.526141) + p*zoom;
-    if (iMouse.w > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy)*.01;
+    p = vec2(-0.533516,0.526141) + p*zoom;
+    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy)*.01;
 
     float trapDist;
     float d = calcDistance(p, trapDist)*1000.;

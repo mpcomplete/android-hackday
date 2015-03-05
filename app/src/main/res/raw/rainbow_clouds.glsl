@@ -45,11 +45,13 @@ mat3 rotation(float angle, vec3 axis)
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     vec2 p = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
-	p.x *= iResolution.x/iResolution.y;
+    p.x *= iResolution.x/iResolution.y;
 
     p.x = p.x*(1. + .2*sin(time*2.));
     p.y = p.y*(1. + .2*sin(time*2.));
-    p *= 1.4;
+    p += vec2(1.2, 1.2);
+    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy);
+    p *= 1.7;
 
     vec3 color = fbm(p);
 
@@ -65,7 +67,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 	vec3 col2 = 0.5 + 0.5*sin(c2 + vec3(0.5,1.0,0.0));
 	color = 2.0*pow(col1*col2,vec3(0.8));
 
-    vec3 axis = fbm(p*.3);
+    vec3 axis = fbm(p*.9);
     color = rotation(.9*length(axis)*sin(8.*time), axis)*color;
 #endif
 

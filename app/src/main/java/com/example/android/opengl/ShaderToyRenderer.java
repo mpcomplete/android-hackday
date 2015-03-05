@@ -65,7 +65,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
 
     private long startTime;  // time since epoch that we started.
     private int screenWidth, screenHeight;
-    private float touchX, touchY;  // last screen pos that was touched
+    private boolean touchActive;  // True if the screen is being touched.
+    private float touchX = 0, touchY = 0;  // last screen pos that was touched
 
     // Vertex shader inputs.
     private int vPosition;  // vec3 the vertex position
@@ -128,9 +129,10 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
         screenHeight = height;
     }
 
-    public void onTouchEvent(float x, float y) {
+    public void onTouchEvent(float x, float y, boolean up) {
+        touchActive = !up;
         touchX = x;
-        touchY = y;
+        touchY = screenHeight - y;
     }
 
     private void initShaderVariables() {
@@ -162,7 +164,8 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             GLES20.glUniform3f(iChannelResolution, width, height, width / height);
             GLES20.glUniform1i(iChannel[i], i);
         }
-        GLES20.glUniform4f(iMouse, touchX, touchY, touchX, touchY);
+        GLES20.glUniform4f(iMouse, touchX, touchY,
+                touchActive ? touchX : 0, touchActive ? touchY : 0);
         GLES20.glUniform4f(iDate, date.getYear(), date.getMonth(), date.getDate(),
                 date.getHours() * 24 * 60 + date.getMinutes() * 60 + date.getSeconds()); // ???
         GLES20.glUniform1f(iSampleRate, 44000.0f);

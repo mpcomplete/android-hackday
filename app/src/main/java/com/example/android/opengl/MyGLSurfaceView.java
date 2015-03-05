@@ -41,9 +41,9 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        mRenderer.onTouchEvent(e.getX(), e.getY(),
-                (e.getActionMasked() & MotionEvent.ACTION_UP) != 0);
         if (e.getY() > 300) {
+            mRenderer.onTouchEvent(e.getX(), e.getY(),
+                    (e.getActionMasked() & MotionEvent.ACTION_UP) != 0);
             this.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION

@@ -48,9 +48,9 @@ float calcDistance(in vec2 c, out float trapDist)
     float m2;
 
     vec2 trap = vec2(.5, 2.)*(sin(1.5*time));
-	#if USE_NOISE
+#if USE_NOISE
     trap += 2.5*(fbm(c*1000. + 3.*(1. + sin(.6*time))).xy);
-	#endif
+#endif
     trapDist = 1e20;
     for( int i=0; i<150; i++ ) {
 		// Z' -> 2·Z·Z' + 1
@@ -94,4 +94,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
 	fragColor = vec4( col, 1.0 );
 
+}
+
+void main(void)
+{
+    mainImage(gl_FragColor, gl_FragCoord.xy);
 }

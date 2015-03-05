@@ -49,7 +49,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     p.x = p.x*(1. + .2*sin(time*2.));
     p.y = p.y*(1. + .2*sin(time*2.));
-    p *= 0.7;
+    p *= 1.4;
 
     vec3 color = fbm(p);
 

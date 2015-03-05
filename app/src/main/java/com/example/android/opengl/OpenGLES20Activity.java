@@ -49,18 +49,14 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     }
 
     private ShaderSpec[] shaders = new ShaderSpec[]{
-            new ShaderSpec("Rainbow Clouds", R.raw.rainbow_clouds, new int[]{R.drawable.tex16}),
             new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
+            new ShaderSpec("Rainbow Clouds", R.raw.rainbow_clouds, new int[]{R.drawable.tex16}),
             new ShaderSpec("Plasma circles", R.raw.plasma_circles, new int[]{}),
             new ShaderSpec("Noisy Fractal", R.raw.noisy_fractal, new int[]{R.drawable.tex16}),
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),
-            new ShaderSpec("Voronoise", R.raw.voronoise, new int[]{}),
             new ShaderSpec("Sphere", R.raw.sphere, new int[]{}),
-            new ShaderSpec("Sun", R.raw.sun, new int[]{R.drawable.tex09, R.drawable.tex11}),
             new ShaderSpec("Water", R.raw.pirates, new int[]{R.drawable.tex03, R.drawable.tex16}),
-            new ShaderSpec("Relentless", R.raw.relentless, new int[]{}),
             new ShaderSpec("Plasma Triangle", R.raw.plasma_triangle, new int[]{R.drawable.tex11}),
-            new ShaderSpec("Heart", R.raw.heart, new int[]{}),
             new ShaderSpec("LSD", R.raw.simple_plasma, new int[]{}),
             // These are too slow.
 //            new ShaderSpec("Clouds", R.raw.clouds, new int[]{R.drawable.tex16}),

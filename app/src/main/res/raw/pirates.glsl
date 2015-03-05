@@ -13,10 +13,10 @@ float fbm( vec2 p )
            0.0625*texture2D( iChannel1, p*8.04 ).x;
 }
 
-void main( void )
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     float time = mod( iGlobalTime, 60.0 );
-	vec2 p = (-iResolution.xy+2.0*gl_FragCoord.xy) / iResolution.y;
+	vec2 p = (-iResolution.xy+2.0*fragCoord.xy) / iResolution.y;
     vec2 i = p;
 
     // camera
@@ -74,5 +74,5 @@ void main( void )
     col *=       smoothstep(  3.0,  6.0, time );
     col *= 1.0 - smoothstep( 44.0, 50.0, time );
 
-    gl_FragColor = vec4( col, 1.0 );
+    fragColor = vec4( col, 1.0 );
 }

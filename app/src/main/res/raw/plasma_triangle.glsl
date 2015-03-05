@@ -1,6 +1,6 @@
 
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
 	float pointRadius = 0.06;
 	float linkSize = 0.04;
@@ -8,7 +8,7 @@ void main(void)
 
 	float minDimension = min(iResolution.x, iResolution.y);
 	vec2 bounds = vec2(iResolution.x / minDimension, iResolution.y / minDimension);
-	vec2 uv = gl_FragCoord.xy / minDimension;
+	vec2 uv = fragCoord.xy / minDimension;
 
 	vec3 pointR = vec3(0.0, 0.0, 1.0);
 	vec3 pointG = vec3(0.0, 0.0, 1.0);
@@ -57,10 +57,10 @@ void main(void)
 	float dotBR = dot(dirToB, dirToR);
 
 	// Start with a bright coloured dot around each point
-	gl_FragColor.x = 1.0 - smoothstep(distToR, 0.0, pointRadius * pointR.z);
-	gl_FragColor.y = 1.0 - smoothstep(distToG, 0.0, pointRadius * pointG.z);
-	gl_FragColor.z = 1.0 - smoothstep(distToB, 0.0, pointRadius * pointB.z);
-	gl_FragColor.w = 1.0;
+	fragColor.x = 1.0 - smoothstep(distToR, 0.0, pointRadius * pointR.z);
+	fragColor.y = 1.0 - smoothstep(distToG, 0.0, pointRadius * pointG.z);
+	fragColor.z = 1.0 - smoothstep(distToB, 0.0, pointRadius * pointB.z);
+	fragColor.w = 1.0;
 
 	// We want to show a coloured link between adjacent points.
 	// Determine the strength of each link at the current fragment.
@@ -85,11 +85,11 @@ void main(void)
 	float contribBonBR = 1.0 - (distToB / sumDistBR);
 
 	// Additively blend the link colours into the fragment.
-	gl_FragColor.x += (linkStrengthRG * contribRonRG) + (linkStrengthBR * contribRonBR);
-	gl_FragColor.y += (linkStrengthGB * contribGonGB) + (linkStrengthRG * contribGonRG);
-	gl_FragColor.z += (linkStrengthBR * contribBonBR) + (linkStrengthGB * contribBonGB);
+	fragColor.x += (linkStrengthRG * contribRonRG) + (linkStrengthBR * contribRonBR);
+	fragColor.y += (linkStrengthGB * contribGonGB) + (linkStrengthRG * contribGonRG);
+	fragColor.z += (linkStrengthBR * contribBonBR) + (linkStrengthGB * contribBonGB);
 
 	// Use an underlying texture to provide some noise
 	float noiseMin = 1.0 - noiseStrength;
-	gl_FragColor.xyz *= (1.0 - noiseStrength) + (noiseStrength * texture2D(iChannel0, uv * 2.0).xyz);
+	fragColor.xyz *= (1.0 - noiseStrength) + (noiseStrength * texture2D(iChannel0, uv * 2.0).xyz);
 }

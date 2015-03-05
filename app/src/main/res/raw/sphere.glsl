@@ -21,9 +21,9 @@ vec3 background(float t, vec3 rd)
 		pow(sky, 1.0)*vec3(0.5, 0.6, 0.7);
 }
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-	vec2 uv = (-1.0 + 2.0*gl_FragCoord.xy / iResolution.xy) *
+	vec2 uv = (-1.0 + 2.0*fragCoord.xy / iResolution.xy) *
 		vec2(iResolution.x/iResolution.y, 1.0);
 	vec3 ro = vec3(0.0, 0.0, -3.0);
 	vec3 rd = normalize(vec3(uv, 1.0));
@@ -33,5 +33,5 @@ void main(void)
 	vec3 bgCol = background(iGlobalTime, rd);
 	rd = reflect(rd, nml);
 	vec3 col = background(iGlobalTime, rd) * vec3(0.9, 0.8, 1.0);
-	gl_FragColor = vec4( mix(bgCol, col, step(0.0, t)), 1.0 );
+	fragColor = vec4( mix(bgCol, col, step(0.0, t)), 1.0 );
 }

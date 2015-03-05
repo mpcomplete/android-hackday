@@ -47,7 +47,12 @@ public class ShaderToyRenderer implements GLSurfaceView.Renderer {
             "uniform sampler2D iChannel2;" +
             "uniform sampler2D iChannel3;" +
             "uniform vec4      iDate;" +                 // (year, month, day, time in seconds)
-            "uniform float     iSampleRate;";            // sound sample rate (i.e., 44100)
+            "uniform float     iSampleRate;" +            // sound sample rate (i.e., 44100)
+            "void mainImage(out vec4 fragColor, in vec2 fragCoord);" +
+            "void main(void)" +
+            "{" +
+            "    mainImage(gl_FragColor, gl_FragCoord.xy);" +
+            "}";
 
     private Context context;
 

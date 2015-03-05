@@ -94,10 +94,4 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	vec3 col = 2.0*sqrt(c1*col1*col2);
 
 	fragColor = vec4( col, 1.0 );
-
-}
-
-void main(void)
-{
-    mainImage(gl_FragColor, gl_FragCoord.xy);
 }

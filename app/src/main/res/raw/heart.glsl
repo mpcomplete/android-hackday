@@ -1,9 +1,9 @@
 // Created by inigo quilez - iq/2013
 // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-	vec2 p = (2.0*gl_FragCoord.xy-iResolution.xy)/min(iResolution.y,iResolution.x);
+	vec2 p = (2.0*fragCoord.xy-iResolution.xy)/min(iResolution.y,iResolution.x);
 
 	p.y -= 0.25;
 
@@ -33,5 +33,5 @@ void main(void)
 
     vec3 col = mix( bcol, hcol, smoothstep( -0.01, 0.01, d-r) );
 
-    gl_FragColor = vec4(col,1.0);
+    fragColor = vec4(col,1.0);
 }

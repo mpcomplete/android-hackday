@@ -45,8 +45,8 @@ vec3 nrand3( vec2 co )
 }
 
 
-void main() {
-    vec2 uv = 2. * gl_FragCoord.xy / iResolution.xy - 1.;
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+    vec2 uv = 2. * fragCoord.xy / iResolution.xy - 1.;
 	vec2 uvs = uv * iResolution.xy / max(iResolution.x, iResolution.y);
 	vec3 p = vec3(uvs / 4., 0) + vec3(1., -1.3, 0.);
 	p += .2 * vec3(sin(iGlobalTime / 16.), sin(iGlobalTime / 12.),  sin(iGlobalTime / 128.));
@@ -81,5 +81,5 @@ void main() {
 	vec3 rnd2 = nrand3( seed2 );
 	starcolor += vec4(pow(rnd2.y,40.0));
 
-	gl_FragColor = mix(freqs[3]-.3, 1., v) * vec4(1.5*freqs[2] * t * t* t , 1.2*freqs[1] * t * t, freqs[3]*t, 1.0)+c2+starcolor;
+	fragColor = mix(freqs[3]-.3, 1., v) * vec4(1.5*freqs[2] * t * t* t , 1.2*freqs[1] * t * t, freqs[3]*t, 1.0)+c2+starcolor;
 }

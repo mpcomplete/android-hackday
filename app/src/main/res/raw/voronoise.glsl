@@ -64,9 +64,9 @@ float iqnoise( in vec2 x, float u, float v )
     return va/wt;
 }
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-	vec2 uv = gl_FragCoord.xy / iResolution.xx;
+	vec2 uv = fragCoord.xy / iResolution.xx;
 
     vec2 p = 0.5 - 0.5*sin( iGlobalTime*vec2(1.01,1.71) );
 
@@ -78,5 +78,5 @@ void main(void)
 
 	float f = iqnoise( 24.0*uv, p.x, p.y );
 
-	gl_FragColor = vec4( f, f, f, 1.0 );
+	fragColor = vec4( f, f, f, 1.0 );
 }

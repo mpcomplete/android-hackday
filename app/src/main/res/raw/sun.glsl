@@ -27,7 +27,7 @@ float snoise(vec3 uv, float res)	// by trisomie21
 
 float freqs[4];
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
 	freqs[0] = texture2D( iChannel1, vec2( 0.01, 0.25 ) ).x;
 	freqs[1] = texture2D( iChannel1, vec2( 0.07, 0.25 ) ).x;
@@ -42,7 +42,7 @@ void main(void)
 	vec3 orangeRed		= vec3( 0.8, 0.35, 0.1 );
 	float time		= iGlobalTime * 0.1;
 	float aspect	= iResolution.x/iResolution.y;
-	vec2 uv			= gl_FragCoord.xy / iResolution.xy;
+	vec2 uv			= fragCoord.xy / iResolution.xy;
 	vec2 p 			= -0.5 + uv;
 	p.x *= aspect;
 
@@ -89,8 +89,8 @@ void main(void)
 	}
 
 	float starGlow	= min( max( 1.0 - dist * ( 1.0 - brightness ), 0.0 ), 1.0 );
-	//gl_FragColor.rgb	= vec3( r );
-	gl_FragColor.rgb	= vec3( f * ( 0.75 + brightness * 0.3 ) * orange ) + starSphere + corona * orange + starGlow * orangeRed;
-	gl_FragColor.a		= 1.0;
+	//fragColor.rgb	= vec3( r );
+	fragColor.rgb	= vec3( f * ( 0.75 + brightness * 0.3 ) * orange ) + starSphere + corona * orange + starGlow * orangeRed;
+	fragColor.a		= 1.0;
 }
 

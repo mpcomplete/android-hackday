@@ -2,9 +2,9 @@ vec3 COLOR1 = vec3(0.0, 0.0, 0.3);
 vec3 COLOR2 = vec3(0.5, 0.0, 0.0);
 float BLOCK_WIDTH = 0.01;
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-	vec2 uv = gl_FragCoord.xy / iResolution.xy;
+	vec2 uv = fragCoord.xy / iResolution.xy;
 
 	// To create the BG pattern
 	vec3 final_color = vec3(1.0);
@@ -34,5 +34,5 @@ void main(void)
 	final_color = bg_color + wave_color;
 
 
-	gl_FragColor = vec4(final_color, 1.0);
+	fragColor = vec4(final_color, 1.0);
 }

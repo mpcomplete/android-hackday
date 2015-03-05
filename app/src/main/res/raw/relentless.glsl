@@ -142,9 +142,9 @@ float shade1(float d)
 	return v + g * 0.5;
 }
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-	vec2 uv = gl_FragCoord.xy / iResolution.xy;
+	vec2 uv = fragCoord.xy / iResolution.xy;
 	uv = uv * 2.0 - 1.0;
 	uv.x *= iResolution.x / iResolution.y;
 	
@@ -254,5 +254,5 @@ void main(void)
 	vec3 col = pow(vec3(inten), 1.5 * vec3(0.15, 2.0, 9.0));
 #endif
 	
-	gl_FragColor = vec4(col, 1.0);
+	fragColor = vec4(col, 1.0);
 }

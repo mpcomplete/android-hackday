@@ -143,9 +143,9 @@ vec4 raymarch( in vec3 ro, in vec3 rd, in vec3 bgcol )
 	return clamp( sum, 0.0, 1.0 );
 }
 
-void main(void)
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-    vec2 p = (-iResolution.xy + 2.0*gl_FragCoord.xy)/ iResolution.y;
+    vec2 p = (-iResolution.xy + 2.0*fragCoord.xy)/ iResolution.y;
 
     vec2 mo = -1.0 + 2.0*iMouse.xy / iResolution.xy;
 
@@ -169,5 +169,5 @@ void main(void)
     // sun glare
 	col += 0.1*vec3(1.0,0.4,0.2)*pow( sun, 3.0 );
 
-    gl_FragColor = vec4( col, 1.0 );
+    fragColor = vec4( col, 1.0 );
 }

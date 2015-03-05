@@ -1,21 +1,24 @@
-float kSpeed = 0.2;
+float time = iGlobalTime * .2;
 
 // Fuzzy circle with radius .5 centered at (.5, .5).
-float circle(in vec2 uv)
+float circle(in vec2 p)
 {
     float r = .5;
     vec2 center = vec2(r, r);
-    float d = distance(uv, center);
+    float d = distance(p, center);
     return step(d, r) * pow(1.-d, 4.);
 }
 
-void main(void)
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    float minResolution = min(iResolution.x, iResolution.y);
-	vec2 uv = gl_FragCoord.xy / minResolution;
-    float time = iGlobalTime * kSpeed;
+    vec2 uv = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
+    uv.x *= iResolution.x/iResolution.y;
 
-    float sets[6];
+    // Move up and zoom in..
+    uv.y += 1.;
+    uv *= .5;
+
+    float sets[5];
 
     // First set:
     vec2 p = uv;
@@ -45,10 +48,10 @@ void main(void)
     p.y += sin(2.*uv.x)*sin(5.*uv.x + 2.0*time);
     sets[4] = circle(mod(p, .2)*5.);
 
-    gl_FragColor.xy += sets[0];
-    gl_FragColor.yz += sets[1];
-    gl_FragColor.xz += sets[2];
-    gl_FragColor.y += 0.5*sets[3];
-    gl_FragColor.xyz += vec3(0.2, 0.4, 0.7)*sets[4];
-    gl_FragColor.w = 1.;
+    fragColor.xy += sets[0];
+    fragColor.yz += sets[1];
+    fragColor.xz += sets[2];
+    fragColor.y += 0.5*sets[3];
+    fragColor.xyz += vec3(0.2, 0.4, 0.7)*sets[4];
+    fragColor.w = 1.;
 }

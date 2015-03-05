@@ -49,6 +49,7 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     }
 
     private ShaderSpec[] shaders = new ShaderSpec[]{
+            new ShaderSpec("Rainbow Clouds", R.raw.rainbow_clouds, new int[]{}),
             new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
             new ShaderSpec("Plasma circles", R.raw.plasma_circles, new int[]{}),
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),

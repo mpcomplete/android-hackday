@@ -18,6 +18,7 @@ package com.example.android.opengl;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
@@ -42,7 +43,15 @@ public class MyGLSurfaceView extends GLSurfaceView {
     public boolean onTouchEvent(MotionEvent e) {
         mRenderer.onTouchEvent(e.getX(), e.getY(),
                 (e.getActionMasked() & MotionEvent.ACTION_UP) != 0);
+        if (e.getY() > 300) {
+            this.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE);
+        }
         return true;
     }
-
 }

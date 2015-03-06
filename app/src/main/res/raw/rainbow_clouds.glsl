@@ -10,7 +10,7 @@ vec3 hsv2rgb(vec3 c)
 
 vec3 noise3(in vec2 uv)
 {
-    return abs(2. * (texture2D(iChannel0, uv*.01).xyz - 0.5));
+    return (1. * (texture2D(iChannel0, uv*.02).xyz - 0.0));
 }
 
 // https://code.google.com/p/fractalt}erraingeneration/wiki/Fractional_Brownian_Motion
@@ -19,7 +19,7 @@ vec3 fbm(in vec2 p)
     const float gain = 0.5;
     const float lacunarity = 2.;
 
-    vec3 total;
+    vec3 total = vec3(0);
 	float amplitude = gain;
 
 	for (int i = 1; i < 7; i++) {
@@ -50,8 +50,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     p.x = p.x*(1. + .2*sin(time*2.));
     p.y = p.y*(1. + .2*sin(time*2.));
     p += vec2(1.2, 1.2);
-    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy);
-    p *= 1.7;
+//    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy);
+    p *= 1.4;
 
     vec3 color = fbm(p);
 

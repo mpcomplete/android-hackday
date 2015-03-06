@@ -1,4 +1,4 @@
-float time = iGlobalTime * 0.1;
+float time = iGlobalTime * 0.15;
 
 // http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
 vec3 hsv2rgb(vec3 c)
@@ -10,7 +10,9 @@ vec3 hsv2rgb(vec3 c)
 
 vec3 noise3(in vec2 uv)
 {
-    return (1. * (texture2D(iChannel0, uv*.02).xyz - 0.0));
+    vec3 f = texture2D(iChannel0, uv/256.0).xyz;
+	f = f*f*(3.0-2.0*f);
+    return f;
 }
 
 // https://code.google.com/p/fractalt}erraingeneration/wiki/Fractional_Brownian_Motion
@@ -45,15 +47,13 @@ mat3 rotation(float angle, vec3 axis)
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
     vec2 p = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
-    p.x *= iResolution.x/iResolution.y;
+	p.x *= iResolution.x/iResolution.y;
 
     p.x = p.x*(1. + .2*sin(time*2.));
     p.y = p.y*(1. + .2*sin(time*2.));
     p += vec2(1.2, 1.2);
-//    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy);
-    p *= 1.4;
 
-    vec3 color = fbm(p);
+    vec3 color = fbm(3.5*p);
 
 #if 0
     color = mod(time + color*1.5, 1.);
@@ -67,7 +67,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 	vec3 col2 = 0.5 + 0.5*sin(c2 + vec3(0.5,1.0,0.0));
 	color = 2.0*pow(col1*col2,vec3(0.8));
 
-    vec3 axis = fbm(p*.9);
+    vec3 axis = fbm(p*0.75);
     color = rotation(.9*length(axis)*sin(8.*time), axis)*color;
 #endif
 

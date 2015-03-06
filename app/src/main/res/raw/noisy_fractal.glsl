@@ -1,4 +1,4 @@
-// Test
+//.
 #define USE_NOISE 1
 
 #if USE_NOISE
@@ -11,7 +11,7 @@ float time = iGlobalTime * 0.3;
 
 vec3 noise3(in vec2 uv)
 {
-    return abs(2. * (texture2D(iChannel0, uv*.01).xyz - 0.5));
+    return texture2D(iChannel0, uv/256.0).xyz;
 }
 
 // https://code.google.com/p/fractalt}erraingeneration/wiki/Fractional_Brownian_Motion
@@ -23,7 +23,7 @@ vec3 fbm(in vec2 p)
     vec3 total;
 	float amplitude = gain;
 
-	for (int i = 1; i < 7; i++) {
+	for (int i = 0; i < 5; i++) {
 		total += noise3(p) * amplitude;
 		amplitude *= gain;
 		p *= lacunarity;
@@ -49,15 +49,15 @@ float calcDistance(in vec2 c, out float trapDist)
     float m2;
 
     vec2 trap = vec2(.5, 2.)*(sin(1.5*time));
-#if USE_NOISE
-    trap += 2.5*(fbm(c*1000. + 3.*(1. + sin(.6*time))).xy);
-#endif
+	#if USE_NOISE
+    trap += 2.5*(2.*fbm(c*1000. + 3.*(1. + sin(.6*time))).xy - 1.);
+	#endif
     trapDist = 1e20;
     for( int i=0; i<150; i++ ) {
-		// Z' -> 2·Z·Z' + 1
+		// Z' -> 2*Z*Z' + 1
         dz = 2.0*cxMult(z, dz) + vec2(1.0,0.0);
 
-        // Z -> Z² + c
+        // Z -> Z^2 + c
         z = c + cxMult(z, z);
 
         m2 = cxModuloSquared(z);
@@ -77,9 +77,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 p = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
     p.x *= iResolution.x/iResolution.y;
 
-    float zoom = 1./(250. + 100.*(1. + sin(time)));
-    p = vec2(-0.533516,0.526141) + p*zoom;
-    if (iMouse.x > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy)*.01;
+    float zoom = 1./(70. + 50.*(1. + sin(time)));
+    p = vec2(-0.53453,0.5263) + p*zoom;
+    //if (iMouse.w > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy)*.01;
 
     float trapDist;
     float d = calcDistance(p, trapDist)*1000.;
@@ -94,4 +94,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	vec3 col = 2.0*sqrt(c1*col1*col2);
 
 	fragColor = vec4( col, 1.0 );
+
 }

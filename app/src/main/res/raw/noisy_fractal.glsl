@@ -1,4 +1,5 @@
-//.
+// Mandlebrot with an orbit trap. Use noise to move the orbit trap.
+
 #define USE_NOISE 1
 
 #if USE_NOISE
@@ -11,7 +12,8 @@ float time = iGlobalTime * 0.3;
 
 vec3 noise3(in vec2 uv)
 {
-    return texture2D(iChannel0, uv/256.0).xyz;
+    vec3 f = texture2D(iChannel0, uv/256.0).xyz;
+	return f*f*(3.0-2.0*f);
 }
 
 // https://code.google.com/p/fractalt}erraingeneration/wiki/Fractional_Brownian_Motion
@@ -23,7 +25,7 @@ vec3 fbm(in vec2 p)
     vec3 total;
 	float amplitude = gain;
 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 7; i++) {
 		total += noise3(p) * amplitude;
 		amplitude *= gain;
 		p *= lacunarity;
@@ -78,8 +80,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     p.x *= iResolution.x/iResolution.y;
 
     float zoom = 1./(70. + 50.*(1. + sin(time)));
-    p = vec2(-0.53453,0.5263) + p*zoom;
-    //if (iMouse.w > .001) p += (-1. + 2.*iMouse.xy/iResolution.xy)*.01;
+	p = vec2(-0.53453,0.5263) + p*zoom;
 
     float trapDist;
     float d = calcDistance(p, trapDist)*1000.;

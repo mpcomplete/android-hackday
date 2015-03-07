@@ -11,8 +11,7 @@ vec3 hsv2rgb(vec3 c)
 vec3 noise3(in vec2 uv)
 {
     vec3 f = texture2D(iChannel0, uv/256.0).xyz;
-	f = f*f*(3.0-2.0*f);
-    return f;
+	return f*f*(3.0-2.0*f);
 }
 
 // https://code.google.com/p/fractalt}erraingeneration/wiki/Fractional_Brownian_Motion
@@ -51,7 +50,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     p.x = p.x*(1. + .2*sin(time*2.));
     p.y = p.y*(1. + .2*sin(time*2.));
-    p += vec2(1.2, 1.2);
+    p += vec2(1.5, 1.5);
 
     vec3 color = fbm(3.5*p);
 

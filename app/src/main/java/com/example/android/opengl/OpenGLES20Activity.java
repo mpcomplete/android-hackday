@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -51,9 +50,9 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
     private ShaderSpec[] shaders = new ShaderSpec[]{
             new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
             new ShaderSpec("Acid Tunnel", R.raw.acid_tunnel, new int[]{}),
-            new ShaderSpec("Rainbow Clouds", R.raw.rainbow_clouds, new int[]{R.drawable.tex16}),
             new ShaderSpec("Plasma circles", R.raw.plasma_circles, new int[]{}),
-            new ShaderSpec("Noisy Fractal", R.raw.noisy_fractal, new int[]{R.drawable.tex16}),
+            new ShaderSpec("Alien Magma", R.raw.alien_magma, new int[]{R.drawable.tex16}),
+            new ShaderSpec("Burning Mandelbrot", R.raw.burning_mandelbrot, new int[]{R.drawable.tex16}),
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),
             new ShaderSpec("Sphere", R.raw.sphere, new int[]{}),
             new ShaderSpec("Water", R.raw.pirates, new int[]{R.drawable.tex03, R.drawable.tex16}),

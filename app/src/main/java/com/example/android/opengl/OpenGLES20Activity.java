@@ -51,7 +51,7 @@ public class OpenGLES20Activity extends Activity implements AdapterView.OnItemSe
             new ShaderSpec("Hypnobar", R.raw.hypnobar, new int[]{}),
             new ShaderSpec("Acid Kaleidoscope", R.raw.acid_kaleidoscope, new int[]{}),
             new ShaderSpec("Plasma circles", R.raw.plasma_circles, new int[]{}),
-            new ShaderSpec("Simple Kaleidoscope", R.raw.simple_kaleidoscope, new int[]{}),
+            new ShaderSpec("Phase Engine", R.raw.phase_engine, new int[]{}),
             new ShaderSpec("Alien Magma", R.raw.alien_magma, new int[]{R.drawable.tex16}),
             new ShaderSpec("Burning Mandelbrot", R.raw.burning_mandelbrot, new int[]{R.drawable.tex16}),
             new ShaderSpec("Waves", R.raw.waves, new int[]{}),

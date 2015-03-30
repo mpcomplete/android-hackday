@@ -1,5 +1,6 @@
-float time = iGlobalTime*.3 + 1.;
+float time = iGlobalTime*.3;
 
+// 2D rotation matrix.
 mat2 rotate(float angle)
 {
     return mat2(
@@ -7,8 +8,18 @@ mat2 rotate(float angle)
         vec2(-sin(angle), cos(angle)));
 }
 
-// Project a point onto the circle of radius max(x,y).
-vec2 mapRects(in vec2 p)
+// Transform a point on square to a circle.
+vec2 mapSquare(in vec2 p)
+{
+    vec2 ap = abs(p);
+    float r = max(ap.x, ap.y);
+    float angle = atan(p.y, p.x);
+
+    return r*vec2(cos(angle), sin(angle));
+}
+
+// Make a pattern of squares in a repeating grid.
+vec2 dupSquares(in vec2 p)
 {
     vec2 ap = abs(sin(p*3.));
     float r = max(ap.x, ap.y);
@@ -17,24 +28,48 @@ vec2 mapRects(in vec2 p)
     return r*vec2(cos(angle), sin(angle));
 }
 
-vec2 getTransform(in vec2 p, int which)
+// Duplicate pattern in dupSquaresConcentric squares.
+vec2 dupSquaresConcentric(in vec2 p)
 {
+    vec2 ap = abs(p);
+    float r = max(ap.x, ap.y);
+    float angle = atan(p.y, p.x);
+
+    return sin(3.*r)*vec2(cos(angle), sin(angle));
+}
+
+// Duplicate pattern in a repeating grid.
+vec2 dupGrid(in vec2 p)
+{
+    return abs(sin(p*4.));
+}
+
+float numPhases = 3.;
+vec2 getTransform(in vec2 p, float t)
+{
+    int which = int(mod(t, numPhases));
+
     if (which == 0) {
-        return p;
+        p = rotate(time*.3)*p*.7;
+        p = dupSquares(p);
     } else if (which == 1) {
-        return mapRects(rotate(time*.3)*p*.5);
+        p = dupSquares(p);
+        p = rotate(time*.3)*p;
+        p = dupSquares(p);
     } else {
-        return rotate(time*.3)*mapRects(mapRects(p));
+        p = dupSquaresConcentric(p);
     }
+    return p;
 }
 
 vec2 applyTransform(in vec2 p)
 {
-    float t = time*.5;
+    float t = time*.3;
+
+    if (iMouse.z > .001) t = iMouse.x/iResolution.x * numPhases;
+
     float pct = smoothstep(0., 1., mod(t, 1.));
-    int current = int(mod(t, 3.));
-	int next = int(mod(t+1., 3.));
-    return mix(getTransform(p, current), getTransform(p, next), pct);
+    return mix(getTransform(p, t), getTransform(p, t+1.), pct);
 }
 
 vec4 gradient(float f)

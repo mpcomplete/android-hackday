@@ -1,3 +1,5 @@
+//#define DEBUG 1
+
 float time = iGlobalTime*.3;
 
 // 2D rotation matrix.
@@ -44,7 +46,7 @@ vec2 dupGrid(in vec2 p)
     return abs(sin(p*4.));
 }
 
-float numPhases = 3.;
+float numPhases = 4.;
 vec2 getTransform(in vec2 p, float t)
 {
     int which = int(mod(t, numPhases));
@@ -54,20 +56,24 @@ vec2 getTransform(in vec2 p, float t)
         p = dupSquares(p);
     } else if (which == 1) {
         p = dupSquares(p);
-        p = rotate(time*.3)*p;
+        p = rotate(time*.2)*p;
         p = dupSquares(p);
-    } else {
+    } else if (which == 2) {
+        p = dupSquares(p);
+        p = rotate(time*.3)*p;
         p = dupSquaresConcentric(p);
+    } else {
+        p = dupSquaresConcentric(p*1.5);
     }
     return p;
 }
 
 vec2 applyTransform(in vec2 p)
 {
-    float t = time*.3;
-
+    float t = time*.35;
+#ifdef DEBUG
     if (iMouse.z > .001) t = iMouse.x/iResolution.x * numPhases;
-
+#endif
     float pct = smoothstep(0., 1., mod(t, 1.));
     return mix(getTransform(p, t), getTransform(p, t+1.), pct);
 }

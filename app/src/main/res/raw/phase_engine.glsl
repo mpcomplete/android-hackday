@@ -1,3 +1,4 @@
+//#define DEBUG 1
 float time = iGlobalTime;
 
 // Fuzzy unit circle.
@@ -129,7 +130,9 @@ vec2 getTransform(in vec2 p, float t)
 vec2 applyTransform(in vec2 p)
 {
     float t = time*.05;
+#ifdef DEBUG
     if (iMouse.z > .001) t = iMouse.x/iResolution.x * numPhases;
+#endif
     float pct = smoothstep(0., 1., mod(t, 1.));
     return mix(getTransform(p, t), getTransform(p, t+1.), pct);
 }
@@ -138,6 +141,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec2 p = -1.0 + 2.0 * fragCoord.xy / iResolution.xy;
     p.x *= iResolution.x/iResolution.y;
+    p *= 1.3;
 
     p = applyTransform(p);
     float c1 = circle(p);
